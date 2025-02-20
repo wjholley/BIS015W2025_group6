@@ -3,7 +3,9 @@
 A final project made by three people:
 
 William Holley -  wjholley@ucdavis.edu
+
 Guanzhi Wang - agwang@ucdavis.edu
+
 Luc-Tanton Tran - lqtran@ucdavis.edu
 
 Will (eventually) become a project that analyzes some data about birds getting malaria.
