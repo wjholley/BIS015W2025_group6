@@ -110,7 +110,8 @@ glimpse(tf_ps) #cursory checking
 
 -   These variable names are so vague. TLR4\_#\_nucleotide? Like is this saying that there's two types of alleles or what
 
--   TLR4_prot\_\*# means the protein haplotype (note to self--google that)
+-   TLR4_prot\_# means the protein haplotype (note to self--google that)
+-   Do we want to change the variables to "Yes/No" or more descriptive terms (homozygous, heterozygous, etc.)
 
 Redefining `malaria`:
 
@@ -120,3 +121,17 @@ tf_ps <- tf_ps %>%
 #Note to self: actually remember to specify that you want to redefine `malaria`...
 glimpse(tf_ps)
 ```
+
+Kid birds that have malaria vs Adult birds that have malaria:
+```{r}
+tf_ps %>% 
+  ggplot(aes(x = age, fill = malaria))+
+  geom_bar(pos = "dodge")+
+  labs(
+    title = "Number of Birds With Malaria by Age Group",
+    x = "Age (Juvinile or Adult)",
+    y = "Number"
+  )+
+  theme(plot.title = element_text(size = rel(1.5), hjust=0.5))
+```
+
