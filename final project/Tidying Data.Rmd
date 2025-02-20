@@ -9,3 +9,4 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## The purpose of this document is to tidy data and rename variables/values for analysis and ease of understanding.
+
