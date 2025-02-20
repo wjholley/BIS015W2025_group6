@@ -35,5 +35,35 @@ merged_df <- merge(tf,ps, all=TRUE) #merge all data frames together
 
 glimpse(merged_df) #cursory glance at df
 ```
+**So I actually started looking at the data and I have zero idea what any of this means. Like what does "UTM" mean? Anyways, actually reading the data README now. What has BIS15L done to me?**
+
+*Ok so apparently it means "Universal Transverse Mercator zone." I'm not touching that with a 15 km pole.*
+
+No less than 10 minutes later, I decided I might as well attempt to analyze it. Here goes:
+
+```{r}
+merged_df %>% 
+  ggplot(
+    aes(utm, mintemp)
+  )+
+  geom_boxplot()+
+  labs(title = "Min Temp by whatever a UTM is",
+       x = "UTM",
+       y = "Min Temp (C)")
+```
+
+OK now I feel silly because there's only one UTM represented in this dataset. I think. Let me see:
+```{r}
+merged_df %>% 
+  summarize(n_utm = n_distinct(utm)) #I was right.
+```
+
+
+```{r}
+merged_df %>% 
+  group_by(easting, northing) %>% 
+  select(easting, northing, density) %>% 
+  summarize(avg_density = mean(density), .groups='keep')
+```
 
 
