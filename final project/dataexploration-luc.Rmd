@@ -66,4 +66,9 @@ merged_df %>%
   summarize(avg_density = mean(density), .groups='keep')
 ```
 
+Outputting the merged df as a csv:
+```{r}
+write.csv(merged_df, "data/landscapegenetics/merged_pipits.csv", row.names = FALSE)
+```
+
 
