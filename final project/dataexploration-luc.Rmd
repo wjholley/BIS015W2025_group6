@@ -129,7 +129,7 @@ tf_ps %>%
   geom_bar(pos = "dodge")+
   labs(
     title = "Number of Birds With Malaria by Age Group",
-    x = "Age (Juvinile or Adult)",
+    x = "Age (Juvenile or Adult)",
     y = "Number"
   )+
   theme(plot.title = element_text(size = rel(1.5), hjust=0.5))
