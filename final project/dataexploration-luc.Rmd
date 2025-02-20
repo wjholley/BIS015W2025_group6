@@ -82,6 +82,11 @@ tf_ps <- read.csv("data/landscapegenetics/TF_PS_pipits.csv") %>% clean_names()
 glimpse(tf_ps) #cursory checking
 ```
 
+```{r}
+merge_2 <- merge(merged_df, tf_ps, by = "sample")
+merge_2
+```
+
 **General takeaways:**
 
 -   Looks like it has a lot of information within the var names themselves. Thank god for pivot.
