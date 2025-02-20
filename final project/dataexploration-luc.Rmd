@@ -1,0 +1,39 @@
+---
+title: "Exploring the Data"
+author: "Luc-Tanton Tran"
+date: "2025-02-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading the Tidyverse, Janitor, other packages
+
+```{r}
+library(tidyverse)
+library(janitor)
+```
+## Loading Data
+```{r}
+tf <- read.csv("data/landscapegenetics/TF_pipits_2011.csv") %>% clean_names() #16 var
+ps <- read.csv("data/landscapegenetics/PS_pipits_2016.csv") %>% clean_names() #15 var
+```
+
+
+## Merging Data
+```{r}
+dim(tf) #checking dimensions
+dim(ps) 
+
+names(tf) #Looking for variable to make them even
+
+tf_1 <- tf %>% select(!autocov1000m) #redefine tf as a different df
+
+merged_df <- merge(tf,ps, all=TRUE) #merge all data frames together
+
+glimpse(merged_df) #cursory glance at df
+```
+
+
