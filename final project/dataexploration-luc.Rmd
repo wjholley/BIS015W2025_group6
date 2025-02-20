@@ -71,4 +71,17 @@ Outputting the merged df as a csv:
 write.csv(merged_df, "data/landscapegenetics/merged_pipits.csv", row.names = FALSE)
 ```
 
+Anyways, since that's not the most important thing known to man:
+```{r}
+tf_ps <- read.csv("data/landscapegenetics/TF_PS_pipits.csv") %>% clean_names()
+glimpse(tf_ps) #cursory checking
+```
 
+**General takeaways: **
+* Looks like it has a lot of information within the var names themselves. Thank god for pivot.
+* Looks actually terrible
+* Gotta read the README to figure out why they're using 1,0, and 2...
+* Need to redefine `malaria` as Yes/No, TRUE/FALSE, because 0/1 is actual dogwater
+* Why there's a whole 'nother dataframe I still gotta figure out
+* Is this what happens when you let a biochemist go crazy with a data analysis program?
+* Anyways, it looks like some of them are whether or not there's a particular aa in a particular position? Why the 2 though??
