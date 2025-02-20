@@ -1,4 +1,4 @@
-# BIS015L-Final-Project
+# BIS015W2025_group6
 
 A final project made by three people:
 
