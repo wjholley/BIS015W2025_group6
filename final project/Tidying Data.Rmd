@@ -22,8 +22,6 @@ tf_ps <- merge(tf_1,ps, all=TRUE) #merge all data frames together
 
 genomics <- read.csv("data/landscapegenetics/TF_PS_pipits.csv") %>% clean_names()
 genomics_tf_ps <- merge(tf_ps, genomics, by = "sample")
-
-write.csv(genomics_tf_ps, "data/landscapegenetics/genomics_tf_ps.csv", row.names = FALSE)
 ```
 
 #no more scientific notation
@@ -52,11 +50,18 @@ _For now, I'll be skipping to the ps/tf df sections because it looks like a pain
 genomics_tf_ps <- genomics_tf_ps %>% 
   select(!utm)
 ```
-## Changing `TLR4_het` to homozygous/heterozygous
+~~Changing `TLR4_het` to homozygous/heterozygous~~ (Found better way)
+```{r}
+#genomics_tf_ps <- genomics_tf_ps %>% 
+#  mutate(tlr4_het = if_else(tlr4_het == 0, "homozygous", "heterozygous"))
+```
+## Mutating any variable ending with `het` to "homozygous", "heterozygous"
 ```{r}
 genomics_tf_ps <- genomics_tf_ps %>% 
-  mutate(tlr4_het = if_else(tlr4_het == 0, "homozygous", "heterozygous"))
-genomics_tf_ps
+  mutate(across(ends_with("het"), #if the var name ends with "het"
+                ~if_else(.x==0, "homozygous", "heterozygous")))
+# Check to see if it ends with 0 (homozygous). Otherwise, heterozygous.
+# Should we consider shortening it to "homo" and "hetero"? Might be easier to read.
 ```
 ## Looking into making some of the dist data into categorical variables...
 ```{r}
@@ -115,4 +120,13 @@ genomics_tf_ps %>%
 
 
 
+
+
+
+
+
+## Update csv file
+```{r}
+write.csv(genomics_tf_ps, "data/landscapegenetics/genomics_tf_ps.csv", row.names = FALSE)
+```
 
