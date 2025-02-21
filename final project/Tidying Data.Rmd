@@ -1,0 +1,56 @@
+---
+title: "Tidying Data"
+output: html_document
+date: "2025-02-20"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+
+```
+
+## The purpose of this document is to tidy data and rename variables/values for analysis and ease of understanding.
+
+```{r}
+tf <- read.csv("data/landscapegenetics/TF_pipits_2011.csv") %>% clean_names() #16 var
+ps <- read.csv("data/landscapegenetics/PS_pipits_2016.csv") %>% clean_names() #15 var
+
+tf_1 <- tf %>% select(!autocov1000m) #redefine tf as a different df
+tf_ps <- merge(tf_1,ps, all=TRUE) #merge all data frames together
+
+genomics <- read.csv("data/landscapegenetics/TF_PS_pipits.csv") %>% clean_names()
+genomics_tf_ps <- merge(tf_ps, genomics, by = "sample")
+
+write.csv(genomics_tf_ps, "data/landscapegenetics/genomics_tf_ps.csv", row.names = FALSE)
+```
+
+# Rewriting Variables
+
+## Redefine `malaria` as "Y" or "N" (To keep consistient with Plasmodium strains)
+```{r}
+genomics_tf_ps <- genomics_tf_ps %>% 
+  mutate(malaria = if_else(malaria == "1", "Y", "N"))
+```
+
+## Age? This one might not be necessary
+```{r}
+genomics_tf_ps <- genomics_tf_ps %>% 
+  mutate(age = if_else(age=="A", "adult", "juvenile")) #I spelled it right this time!
+```
+
+_For now, I'll be skipping to the ps/tf df sections because it looks like a pain in the rear to code the hetrozygote part. I'll come back when I learn how to make my own function._
+
+## Straight up removing `utm` because what the hell man
+```{r}
+genomics_tf_ps <- genomics_tf_ps %>% 
+  select(!utm)
+```
+## Changing `TLR4_het` to homozygous/heterozygous
+```{r}
+genomics_tf_ps <- genomics_tf_ps %>% 
+  mutate(tlr4_het = if_else(tlr4_het == 0, "homozygous", "heterozygous"))
+```
+
+
