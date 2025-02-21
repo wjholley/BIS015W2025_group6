@@ -22,8 +22,6 @@ tf_ps <- merge(tf_1,ps, all=TRUE) #merge all data frames together
 
 genomics <- read.csv("data/landscapegenetics/TF_PS_pipits.csv") %>% clean_names()
 genomics_tf_ps <- merge(tf_ps, genomics, by = "sample")
-
-write.csv(genomics_tf_ps, "data/landscapegenetics/genomics_tf_ps.csv", row.names = FALSE)
 ```
 
 # Rewriting Variables
@@ -47,10 +45,26 @@ _For now, I'll be skipping to the ps/tf df sections because it looks like a pain
 genomics_tf_ps <- genomics_tf_ps %>% 
   select(!utm)
 ```
-## Changing `TLR4_het` to homozygous/heterozygous
+~~Changing `TLR4_het` to homozygous/heterozygous~~ (Found better way)
+```{r}
+#genomics_tf_ps <- genomics_tf_ps %>% 
+#  mutate(tlr4_het = if_else(tlr4_het == 0, "homozygous", "heterozygous"))
+```
+## Mutating any variable ending with `het` to "homozygous", "heterozygous"
 ```{r}
 genomics_tf_ps <- genomics_tf_ps %>% 
-  mutate(tlr4_het = if_else(tlr4_het == 0, "homozygous", "heterozygous"))
+  mutate(across(ends_with("het"), #if the var name ends with "het"
+                ~if_else(.x==0, "homozygous", "heterozygous")))
+# Check to see if it ends with 0 (homozygous). Otherwise, heterozygous.
 ```
 
+
+
+
+
+
+## Update csv file
+```{r}
+write.csv(genomics_tf_ps, "data/landscapegenetics/genomics_tf_ps.csv", row.names = FALSE)
+```
 
