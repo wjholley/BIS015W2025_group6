@@ -8,7 +8,7 @@ date: "2025-02-20"
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(janitor)
-
+library(gtools)
 ```
 
 ## The purpose of this document is to tidy data and rename variables/values for analysis and ease of understanding.
@@ -22,6 +22,11 @@ tf_ps <- merge(tf_1,ps, all=TRUE) #merge all data frames together
 
 genomics <- read.csv("data/landscapegenetics/TF_PS_pipits.csv") %>% clean_names()
 genomics_tf_ps <- merge(tf_ps, genomics, by = "sample")
+```
+
+#no more scientific notation
+```{r}
+options(scipen=999)
 ```
 
 # Rewriting Variables
@@ -38,7 +43,7 @@ genomics_tf_ps <- genomics_tf_ps %>%
   mutate(age = if_else(age=="A", "adult", "juvenile")) #I spelled it right this time!
 ```
 
-_For now, I'll be skipping to the ps/tf df sections because it looks like a pain in the rear to code the hetrozygote part. I'll come back when I learn how to make my own function._
+_For now, I'll be skipping to the ps/tf df sections because it looks like a pain in the rear to code the heterozygote part. I'll come back when I learn how to make my own function._
 
 ## Straight up removing `utm` because what the hell man
 ```{r}
@@ -58,6 +63,62 @@ genomics_tf_ps <- genomics_tf_ps %>%
 # Check to see if it ends with 0 (homozygous). Otherwise, heterozygous.
 # Should we consider shortening it to "homo" and "hetero"? Might be easier to read.
 ```
+## Looking into making some of the dist data into categorical variables...
+```{r}
+quartileswater <- quantcut(genomics_tf_ps$distwater)
+table(quartileswater)
+
+quartilesurban <- quantcut(genomics_tf_ps$dist_urb)
+table(quartilesurban)
+
+quartilesfarm <- quantcut(genomics_tf_ps$distfarm)
+table(quartilesfarm)
+
+quartilespoul <- quantcut(genomics_tf_ps$distpoul)
+table(quartilespoul)
+```
+```{r}
+genomics_tf_ps <- genomics_tf_ps %>% 
+  mutate(distwater_cat = case_when(distwater <= 105 ~ "close",
+                                   distwater > 105 & distwater <= 258 ~ "median close",
+                                   distwater > 258 & distwater <= 725 ~ "median far",
+                                   distwater > 725 ~ "far"))
+```
+
+```{r}
+genomics_tf_ps <- genomics_tf_ps %>% 
+  mutate(disturb_cat = case_when(dist_urb <= 45 ~ "close",
+                                   dist_urb > 45 & dist_urb <= 108 ~ "median close",
+                                   dist_urb > 108 & dist_urb <= 282 ~ "median far",
+                                   dist_urb > 282 ~ "far"))
+```
+
+```{r}
+genomics_tf_ps <- genomics_tf_ps %>% 
+  mutate(distfarm_cat = case_when(distfarm <= 429 ~ "close",
+                                   distfarm > 429 & distfarm <= 723 ~ "median close",
+                                   distfarm > 723 & distfarm <= 1240 ~ "median far",
+                                   distfarm > 1240 ~ "far"))
+```
+
+```{r}
+genomics_tf_ps <- genomics_tf_ps %>% 
+  mutate(distpoul_cat = case_when(distpoul <= 860 ~ "close",
+                                   distpoul > 860 & distpoul <= 1830 ~ "median close",
+                                   distpoul> 1830 & distpoul <= 3410 ~ "median far",
+                                   distpoul > 3410 ~ "far"))
+```
+
+```{r}
+genomics_tf_ps %>% 
+  select(sample, distwater_cat, distfarm_cat, disturb_cat, distpoul_cat)
+```
+
+## we can change the category names at some point but those were the best I could come up with in the moment
+
+
+
+
 
 
 
