@@ -56,6 +56,7 @@ genomics_tf_ps <- genomics_tf_ps %>%
   mutate(across(ends_with("het"), #if the var name ends with "het"
                 ~if_else(.x==0, "homozygous", "heterozygous")))
 # Check to see if it ends with 0 (homozygous). Otherwise, heterozygous.
+# Should we consider shortening it to "homo" and "hetero"? Might be easier to read.
 ```
 
 
