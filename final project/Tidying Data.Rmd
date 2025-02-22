@@ -1,5 +1,8 @@
 ---
 title: "Tidying Data"
+author:
+  - Luc-Tanton Tran, lqtran@ucdavis.edu
+  - William Holley, wjholley@ucdavis.edu
 output: html_document
 date: "2025-02-20"
 ---
@@ -115,6 +118,8 @@ genomics_tf_ps %>%
 ```
 
 ## we can change the category names at some point but those were the best I could come up with in the moment
+### They look good enough to me right now, 
+
 
 
 
