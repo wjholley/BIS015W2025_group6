@@ -14,8 +14,8 @@ library(gtools)
 ## The purpose of this document is to tidy data and rename variables/values for analysis and ease of understanding.
 
 ```{r}
-tf <- read.csv("data/landscapegenetics/TF_pipits_2011.csv") %>% clean_names() #16 var
-ps <- read.csv("data/landscapegenetics/PS_pipits_2016.csv") %>% clean_names() #15 var
+tf <- read.csv("data/landscapegenetics/TF_pipits_2011.csv") %>% clean_names()
+ps <- read.csv("data/landscapegenetics/PS_pipits_2016.csv") %>% clean_names()
 
 tf_1 <- tf %>% select(!autocov1000m) #redefine tf as a different df
 tf_ps <- merge(tf_1,ps, all=TRUE) #merge all data frames together
