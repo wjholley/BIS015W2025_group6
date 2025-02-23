@@ -118,7 +118,14 @@ genomics_tf_ps %>%
 ```
 
 ## we can change the category names at some point but those were the best I could come up with in the moment
-### They look good enough to me right now, 
+### They look good enough to me right now
+
+
+## converting 
+```{r}
+
+```
+
 
 
 
@@ -133,5 +140,13 @@ genomics_tf_ps %>%
 ## Update csv file
 ```{r}
 write.csv(genomics_tf_ps, "data/landscapegenetics/genomics_tf_ps.csv", row.names = FALSE)
+```
+
+
+## Trying a different way to merge (join) datasets
+```{r}
+tf_ps %>% 
+  left_join(genomics)
+#This seems to do the same thing as our merge from above, but carries over another sample for some reason
 ```
 
