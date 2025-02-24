@@ -121,9 +121,10 @@ genomics_tf_ps %>%
 ### They look good enough to me right now
 
 
-## converting 
+## converting "0/1" to "absent/present"
 ```{r}
-
+genomics_tf_ps %>% 
+  mutate(across(matches("_[acgt]$|_prot_[1234]$"), ~if_else(.x== 0, "absent", "present")))
 ```
 
 
