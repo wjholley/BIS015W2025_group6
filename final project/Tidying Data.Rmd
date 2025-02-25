@@ -6,9 +6,12 @@ date: "2025-02-20"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+#install.packages("sf")
 library(tidyverse)
 library(janitor)
 library(gtools)
+library(sf)
+library(ggmap)
 ```
 
 ## The purpose of this document is to tidy data and rename variables/values for analysis and ease of understanding.
@@ -115,6 +118,64 @@ genomics_tf_ps %>%
 ```
 
 ## we can change the category names at some point but those were the best I could come up with in the moment
+```{r}
+tf_latlong <- st_as_sf(tf, coords = c("easting", "northing"), crs = "+proj=utm +zone=28 +datum=WGS84 +units=m +north")
+tf_latlong <- st_transform(tf_latlong, crs = 4326)
+tf <- tf %>%
+  mutate(longitude = st_coordinates(tf_latlong)[,1],
+         latitude = st_coordinates(tf_latlong)[,2])
+```
+```{r}
+tf %>% 
+  select(latitude, longitude) %>% 
+  summary()
+```
+```{r}
+latitude <- c(28.01, 28.58)
+longitude <- c(-16.92, -16.18)
+tf_bbox <- make_bbox(longitude, latitude, f = 0.05)
+tf_map <- get_stadiamap(tf_bbox, maptype = "stamen_terrain", zoom=12)
+```
+
+```{r}
+ggmap(tf_map)+
+  geom_point(data = tf, aes(longitude, latitude), size=1) +
+  labs(x= "Longitude", y= "Latitude", title = "Bird Locations of Tenerife")
+```
+
+```{r}
+ps_latlong <- st_as_sf(ps, coords = c("easting", "northing"), crs = "+proj=utm +zone=28 +datum=WGS84 +units=m +north")
+ps_latlong <- st_transform(ps_latlong, crs = 4326)
+ps <- ps %>%
+  mutate(longitude = st_coordinates(ps_latlong)[,1],
+         latitude = st_coordinates(ps_latlong)[,2])
+```
+
+```{r}
+ps %>% 
+  select(latitude, longitude) %>% 
+  summary()
+```
+
+```{r}
+latitude <- c(33.03, 33.10)
+longitude <- c(-16.39, -16.3)
+ps_bbox <- make_bbox(longitude, latitude, f = 0.05)
+ps_map <- get_stadiamap(ps_bbox, maptype = "stamen_terrain", zoom=15)
+```
+
+```{r}
+ggmap(ps_map)+
+  geom_point(data = ps, aes(longitude, latitude), size=1) +
+  labs(x= "Longitude", y= "Latitude", title = "Bird Locations of Porto Santo")
+```
+
+
+
+
+
+
+
 
 
 
