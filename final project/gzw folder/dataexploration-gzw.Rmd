@@ -17,3 +17,17 @@ library("tidyverse")
 library("janitor")
 library("naniar")
 library("dplyr")
+library("here")#3
+```
+
+#load the data
+```{r}
+tf <- read_csv(here("final project/data/landscapegenetics","TF_pipits_2011.csv")) %>% clean_names() #16 var
+ps <- read.csv(here("final project/data/landscapegenetics","PS_pipits_2016.csv")) %>% clean_names() #15 var
+
+tf_1 <- tf %>% select(!autocov1000m) #redefine tf as a different df
+tf_ps <- merge(tf_1,ps, all=TRUE) #merge all data frames together
+
+genomics_tf_ps <- read.csv(here("final project/data/landscapegenetics","genomics_tf_ps.csv")) %>% clean_names()
+```
+
