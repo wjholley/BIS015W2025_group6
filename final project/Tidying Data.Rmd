@@ -3,6 +3,7 @@ title: "Tidying Data"
 author:
   - Luc-Tanton Tran, lqtran@ucdavis.edu
   - William Holley, wjholley@ucdavis.edu
+  - Guanzhi Wang, agwang@ucdavis.edu
 output: html_document
 date: "2025-02-20"
 ---
