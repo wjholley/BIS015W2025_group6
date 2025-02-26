@@ -1,5 +1,8 @@
 ---
 title: "Tidying Data"
+author:
+  - Luc-Tanton Tran, lqtran@ucdavis.edu
+  - William Holley, wjholley@ucdavis.edu
 output: html_document
 date: "2025-02-20"
 ---
@@ -178,6 +181,73 @@ ggmap(ps_map)+
 
 
 
+## converting "0/1" to "absent/present"
+```{r}
+genomics_tf_ps %>% 
+  mutate(across(matches("_[acgt]$|_prot_[1234]$"), ~if_else(.x== 0, "absent", "present")))
+```
+
+
+```{r}
+tf_latlong <- st_as_sf(tf, coords = c("easting", "northing"), crs = "+proj=utm +zone=28 +datum=WGS84 +units=m +north")
+tf_latlong <- st_transform(tf_latlong, crs = 4326)
+tf <- tf %>%
+  mutate(longitude = st_coordinates(tf_latlong)[,1],
+         latitude = st_coordinates(tf_latlong)[,2])
+```
+```{r}
+tf %>% 
+  select(latitude, longitude) %>% 
+  summary()
+```
+```{r}
+latitude <- c(28.01, 28.58)
+longitude <- c(-16.92, -16.18)
+tf_bbox <- make_bbox(longitude, latitude, f = 0.05)
+tf_map <- get_stadiamap(tf_bbox, maptype = "stamen_terrain", zoom=12)
+```
+
+```{r}
+ggmap(tf_map)+
+  geom_point(data = tf, aes(longitude, latitude), size=1) +
+  labs(x= "Longitude", y= "Latitude", title = "Bird Locations of Tenerife")
+```
+
+```{r}
+ps_latlong <- st_as_sf(ps, coords = c("easting", "northing"), crs = "+proj=utm +zone=28 +datum=WGS84 +units=m +north")
+ps_latlong <- st_transform(ps_latlong, crs = 4326)
+ps <- ps %>%
+  mutate(longitude = st_coordinates(ps_latlong)[,1],
+         latitude = st_coordinates(ps_latlong)[,2])
+```
+
+```{r}
+ps %>% 
+  select(latitude, longitude) %>% 
+  summary()
+```
+
+```{r}
+latitude <- c(33.03, 33.10)
+longitude <- c(-16.39, -16.3)
+ps_bbox <- make_bbox(longitude, latitude, f = 0.05)
+ps_map <- get_stadiamap(ps_bbox, maptype = "stamen_terrain", zoom=15)
+```
+
+```{r}
+ggmap(ps_map)+
+  geom_point(data = ps, aes(longitude, latitude), size=1) +
+  labs(x= "Longitude", y= "Latitude", title = "Bird Locations of Porto Santo")
+```
+
+
+
+
+
+
+
+
+
 
 
 
@@ -190,4 +260,5 @@ ggmap(ps_map)+
 ```{r}
 write.csv(genomics_tf_ps, "data/landscapegenetics/genomics_tf_ps.csv", row.names = FALSE)
 ```
+
 
