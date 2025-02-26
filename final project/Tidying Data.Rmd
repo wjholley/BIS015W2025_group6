@@ -121,6 +121,15 @@ genomics_tf_ps %>%
 ```
 
 ## we can change the category names at some point but those were the best I could come up with in the moment
+
+
+## converting "0/1" to "absent/present"
+```{r}
+genomics_tf_ps %>% 
+  mutate(across(matches("_[acgt]$|_prot_[1234]$"), ~if_else(.x== 0, "absent", "present")))
+```
+
+
 ```{r}
 tf_latlong <- st_as_sf(tf, coords = c("easting", "northing"), crs = "+proj=utm +zone=28 +datum=WGS84 +units=m +north")
 tf_latlong <- st_transform(tf_latlong, crs = 4326)
