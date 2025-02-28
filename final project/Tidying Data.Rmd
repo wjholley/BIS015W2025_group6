@@ -18,6 +18,10 @@ library(sf)
 library(ggmap)
 ```
 
+```{r}
+register_stadiamaps("1d92513d-1a7f-407d-8c65-60d0d510c9c0", write = FALSE)
+```
+
 ## The purpose of this document is to tidy data and rename variables/values for analysis and ease of understanding.
 
 ```{r}
@@ -132,15 +136,18 @@ genomics_tf_ps <- genomics_tf_ps %>%
 
 
 ```{r}
-tf_latlong <- st_as_sf(tf, coords = c("easting", "northing"), crs = "+proj=utm +zone=28 +datum=WGS84 +units=m +north")
-tf_latlong <- st_transform(tf_latlong, crs = 4326)
-tf <- tf %>%
-  mutate(longitude = st_coordinates(tf_latlong)[,1],
-         latitude = st_coordinates(tf_latlong)[,2])
+tf_ps_latlong <- st_as_sf(genomics_tf_ps, coords = c("easting", "northing"), crs = "+proj=utm +zone=28 +datum=WGS84 +units=m +north")
+tf_ps_latlong <- st_transform(tf_ps_latlong, crs = 4326)
+genomics_tf_ps <- genomics_tf_ps %>%
+  mutate(longitude = st_coordinates(tf_ps_latlong)[,1],
+         latitude = st_coordinates(tf_ps_latlong)[,2])
+genomics_tf_ps %>% 
+  select(sample, latitude, longitude)
 ```
 ```{r}
-tf %>% 
-  select(latitude, longitude) %>% 
+genomics_tf_ps %>% 
+  filter(island == "TF") %>% 
+  select(latitude, longitude) %>%
   summary()
 ```
 ```{r}
@@ -152,20 +159,13 @@ tf_map <- get_stadiamap(tf_bbox, maptype = "stamen_terrain", zoom=12)
 
 ```{r}
 ggmap(tf_map)+
-  geom_point(data = tf, aes(longitude, latitude), size=1) +
+  geom_point(data = genomics_tf_ps, aes(longitude, latitude, color = malaria), size=1) +
   labs(x= "Longitude", y= "Latitude", title = "Bird Locations of Tenerife")
 ```
 
 ```{r}
-ps_latlong <- st_as_sf(ps, coords = c("easting", "northing"), crs = "+proj=utm +zone=28 +datum=WGS84 +units=m +north")
-ps_latlong <- st_transform(ps_latlong, crs = 4326)
-ps <- ps %>%
-  mutate(longitude = st_coordinates(ps_latlong)[,1],
-         latitude = st_coordinates(ps_latlong)[,2])
-```
-
-```{r}
-ps %>% 
+genomics_tf_ps %>%
+  filter(island == "PS") %>% 
   select(latitude, longitude) %>% 
   summary()
 ```
@@ -174,12 +174,12 @@ ps %>%
 latitude <- c(33.03, 33.10)
 longitude <- c(-16.39, -16.3)
 ps_bbox <- make_bbox(longitude, latitude, f = 0.05)
-ps_map <- get_stadiamap(ps_bbox, maptype = "stamen_terrain", zoom=15)
+ps_map <- get_stadiamap(ps_bbox, maptype = "stamen_terrain", zoom=12)
 ```
 
 ```{r}
 ggmap(ps_map)+
-  geom_point(data = ps, aes(longitude, latitude), size=1) +
+  geom_point(data = genomics_tf_ps, aes(longitude, latitude, color = malaria), size=1) +
   labs(x= "Longitude", y= "Latitude", title = "Bird Locations of Porto Santo")
 ```
 
