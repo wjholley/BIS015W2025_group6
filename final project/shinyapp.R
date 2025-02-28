@@ -11,16 +11,16 @@ tf_ps <- read_csv("data/landscapegenetics/genomics_tf_ps.csv")
 
 latitude_tf <- c(28.01, 28.58)
 longitude_tf <- c(-16.92, -16.18)
-tf_bbox <- make_bbox(longitude_tf, latitude_tf, f = 0.05)
-tf_map <- get_stadiamap(tf_bbox, maptype = "stamen_terrain", zoom=6)
+tf_bbox <- make_bbox(longitude_tf, latitude_tf, f = 0.1)
+tf_map <- get_stadiamap(tf_bbox, maptype = "stamen_terrain", zoom=10)
 
 tf_coordinates <- tf_ps %>% 
   filter(island == "TF")
 
 latitude_ps <- c(33.03, 33.10)
 longitude_ps <- c(-16.39, -16.3)
-ps_bbox <- make_bbox(longitude_ps, latitude_ps, f = 0.05)
-ps_map <- get_stadiamap(ps_bbox, maptype = "stamen_terrain", zoom=13)
+ps_bbox <- make_bbox(longitude_ps, latitude_ps, f = 0.1)
+ps_map <- get_stadiamap(ps_bbox, maptype = "stamen_terrain", zoom=12)
 
 ps_coordinates <- tf_ps %>% 
   filter(island == "PS")
@@ -29,19 +29,19 @@ ps_coordinates <- tf_ps %>%
 
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Birds of Porto Santo and Tenerife"),
+  dashboardHeader(title = "Title Placeholder"),
   
   ## Sidebar content
   dashboardSidebar(
     sidebarMenu(
       
-      menuItem("Maps", 
-               tabName = "dashboard", 
+      menuItem("Porto Santo Map", 
+               tabName = "psmap", 
                icon = icon("dashboard")),
       
-      menuItem("Counts", 
-               tabName = "widgets", 
-               icon = icon("th"))
+      menuItem("Tenerife Map", 
+               tabName = "tfmap", 
+               icon = icon("dashboard"))
     )
   ),
   
@@ -51,48 +51,51 @@ ui <- dashboardPage(
     tabItems(
       
       ## First tab content    
-      tabItem(tabName = "dashboard",
+      tabItem(tabName = "psmap",
               fluidRow(
-                box(plotOutput("plot1")), # box is a container for the plot
+                box(title = "Map", plotOutput("psplot")), # box is a container for the plot
                 box(title = "Controls", # box is a container for the controls
-                    selectInput("fill", 
-                                "Select variable to fill by:", 
+                    selectInput("pscolor", 
+                                "Select variable to color by:", 
                                 choices = c("malaria", "distwater_cat", "disturb_cat", "distfarm_cat", "distpoul_cat"),
                                 selected = "malaria")
                 )
               )
       ),
       
-      ## Second tab item 
-      tabItem(tabName = "widgets",
+      tabItem(tabName = "tfmap",
               fluidRow(
-                box(plotOutput("plot2", height = 250)), # box is a container for the plot
+                box(plotOutput("plot2")), # box is a container for the plot
                 box(title = "Controls", # box is a container for the controls
-                    radioButtons("x", 
-                                 "Select Fill Variable", 
-                                 choices=c("trophic.guild", "thermoregulation"),
-                                 selected="trophic.guild")
+                    selectInput("tfcolor", 
+                                "Select variable to color by:", 
+                                choices = c("malaria", "distwater_cat", "disturb_cat", "distfarm_cat", "distpoul_cat"),
+                                selected = "malaria")
                 )
               )
       )
     )
-  )
+  )#,
+  #plotOutput("psplot", width = "1000px", height = "500px")
 )
 
 server <- function(input, output, session) {
   
-  output$plot1 <- renderPlot({
+  output$psplot <- renderPlot({
     
       ggmap(ps_map)+
-      geom_point(data = ps_coordinates, aes_string("longitude", "latitude", group = input$fill, color = input$fill))
-  })
+      geom_point(data = ps_coordinates, 
+                 aes_string("longitude", "latitude", group = input$pscolor, color = input$pscolor))+
+      labs(x = "Longitude", y = "Latitude")
+  
+    })
 
   output$plot2 <- renderPlot({
     
-    homerange %>% 
-      ggplot(aes_string(x="locomotion", fill=input$x))+
-      geom_bar(position="dodge", alpha=0.8, color="black")+
-      labs(x=NULL, y=NULL, fill="Fill Variable")
+    ggmap(tf_map)+
+      geom_point(data = tf_coordinates, 
+                 aes_string("longitude", "latitude", group = input$tfcolor, color = input$tfcolor))+
+      labs(x = "Longitude", y = "Latitude")
     
   })
   
