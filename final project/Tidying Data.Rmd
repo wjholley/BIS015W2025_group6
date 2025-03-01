@@ -29,10 +29,10 @@ tf <- read.csv("data/landscapegenetics/TF_pipits_2011.csv") %>% clean_names() #1
 ps <- read.csv("data/landscapegenetics/PS_pipits_2016.csv") %>% clean_names() #15 var
 
 tf_1 <- tf %>% select(!autocov1000m) #redefine tf as a different df
-tf_ps <- merge(tf_1,ps, all=TRUE) #merge all data frames together
+tf_ps <- full_join(tf_1,ps) #join all data frames together
 
 genomics <- read.csv("data/landscapegenetics/TF_PS_pipits.csv") %>% clean_names()
-genomics_tf_ps <- merge(tf_ps, genomics, by = "sample")
+genomics_tf_ps <- left_join(tf_ps, genomics, by = "sample")
 ```
 
 #no more scientific notation

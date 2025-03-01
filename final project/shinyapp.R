@@ -4,6 +4,7 @@ library(gtools)
 library(sf)
 library(ggmap)
 library(shiny)
+library(shinydashboard)
 
 register_stadiamaps("1d92513d-1a7f-407d-8c65-60d0d510c9c0", write = FALSE)
 
@@ -80,6 +81,8 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
+  
+  session$onSessionEnded(stopApp) #Stop the app from running immediately after it's closed
   
   output$psplot <- renderPlot({
     
