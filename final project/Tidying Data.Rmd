@@ -183,6 +183,11 @@ ggmap(ps_map)+
   labs(x= "Longitude", y= "Latitude", title = "Bird Locations of Porto Santo")
 ```
 
+```{r}
+names(genomics_tf_ps)
+```
+
+
 
 ## Update csv file
 ```{r}
