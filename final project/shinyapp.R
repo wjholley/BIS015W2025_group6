@@ -5,6 +5,7 @@ library(sf)
 library(ggmap)
 library(shiny)
 library(shinydashboard)
+library(bslib)
 
 register_stadiamaps("1d92513d-1a7f-407d-8c65-60d0d510c9c0", write = FALSE)
 
@@ -21,79 +22,49 @@ tf_coordinates <- tf_ps %>%
 latitude_ps <- c(33.03, 33.10)
 longitude_ps <- c(-16.39, -16.3)
 ps_bbox <- make_bbox(longitude_ps, latitude_ps, f = 0.1)
-ps_map <- get_stadiamap(ps_bbox, maptype = "stamen_terrain", zoom=12)
+ps_map <- get_stadiamap(ps_bbox, maptype = "stamen_terrain", zoom=13)
 
 ps_coordinates <- tf_ps %>% 
   filter(island == "PS")
 
-
-
-
-ui <- dashboardPage(
-  dashboardHeader(title = "Title Placeholder"),
+ui <- page_navbar(
   
-  ## Sidebar content
-  dashboardSidebar(
-    sidebarMenu(
-      
-      menuItem("Porto Santo Map", 
-               tabName = "psmap", 
-               icon = icon("dashboard")),
-      
-      menuItem("Tenerife Map", 
-               tabName = "tfmap", 
-               icon = icon("dashboard"))
-    )
-  ),
+  title = "Avians of Tenerife and Porto Santo",
+  nav_panel(title = "Porto Santo", p("Mapping options for Porto Santo."),
+            selectInput("pscolor",
+                        "Select what to color samples by:",
+                        choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Farmland" = "distfarm_cat", "Relative Distance from Pollution" = "distpoul_cat"),
+                        selected = ("malaria")),
+            plotOutput("psplot")
+            ),
   
-  ## Body content
-  dashboardBody(
-    
-    tabItems(
-      
-      ## First tab content    
-      tabItem(tabName = "psmap",
-              fluidRow(
-                box(title = "Map", plotOutput("psplot")), # box is a container for the plot
-                box(title = "Controls", # box is a container for the controls
-                    selectInput("pscolor", 
-                                "Select variable to color by:", 
-                                choices = c("malaria", "distwater_cat", "disturb_cat", "distfarm_cat", "distpoul_cat"),
-                                selected = "malaria")
-                )
-              )
-      ),
-      
-      tabItem(tabName = "tfmap",
-              fluidRow(
-                box(plotOutput("plot2")), # box is a container for the plot
-                box(title = "Controls", # box is a container for the controls
-                    selectInput("tfcolor", 
-                                "Select variable to color by:", 
-                                choices = c("malaria", "distwater_cat", "disturb_cat", "distfarm_cat", "distpoul_cat"),
-                                selected = "malaria")
-                )
-              )
-      )
-    )
-  )#,
-  #plotOutput("psplot", width = "1000px", height = "500px")
+  nav_panel(title = "Tenerife", p("Mapping options for Tenerife."),
+            selectInput("tfcolor",
+                        "Select what to color samples by:",
+                        choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Farmland" = "distfarm_cat", "Relative Distance from Pollution" = "distpoul_cat"),
+                        selected = ("malaria")),
+            plotOutput("tfplot")
+            ),
+  
+  nav_menu(title = "Links",
+           nav_item(tags$a("Study", href = "https://pmc.ncbi.nlm.nih.gov/articles/PMC6875583/")),
+           nav_item(tags$a("Data", href = "https://datadryad.org/dataset/doi:10.5061/dryad.228986b")),
+           nav_item(tags$a("Our Github", href = "https://github.com/wjholley/BIS15W2025_group6"))
+           )
 )
 
 server <- function(input, output, session) {
-  
-  session$onSessionEnded(stopApp) #Stop the app from running immediately after it's closed
   
   output$psplot <- renderPlot({
     
       ggmap(ps_map)+
       geom_point(data = ps_coordinates, 
-                 aes_string("longitude", "latitude", group = input$pscolor, color = input$pscolor))+
+                 aes_string("longitude", "latitude", color = input$pscolor))+
       labs(x = "Longitude", y = "Latitude")
   
     })
 
-  output$plot2 <- renderPlot({
+  output$tfplot <- renderPlot({
     
     ggmap(tf_map)+
       geom_point(data = tf_coordinates, 
