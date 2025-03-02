@@ -18,6 +18,11 @@ library("janitor")
 library("naniar")
 library("dplyr")
 library("here")#3
+library("shiny")
+library("shinydashboard")
+library("ggplot2")
+library("shinythemes")
+
 ```
 
 #load the data
@@ -27,7 +32,130 @@ ps <- read.csv(here("final project/data/landscapegenetics","PS_pipits_2016.csv")
 
 tf_1 <- tf %>% select(!autocov1000m) #redefine tf as a different df
 tf_ps <- merge(tf_1,ps, all=TRUE) #merge all data frames together
-
+genomics <- read.csv(here("final project/data/landscapegenetics","TF_PS_pipits.csv")) %>% clean_names()
 genomics_tf_ps <- read.csv(here("final project/data/landscapegenetics","genomics_tf_ps.csv")) %>% clean_names()
 ```
+
+```{r}
+genomics_tf_ps %>% 
+  na.omit %>% 
+   filter(island == "TF") %>% 
+    count(x5239s1_t, malaria) %>%
+    group_by(x5239s1_t) %>%
+    mutate(percent = n / sum(n) * 100)%>%
+ggplot(aes(x = factor(x5239s1_t), y=percent,fill = factor(malaria))) +
+    geom_col(position = "dodge") +  
+    scale_y_continuous(labels = scales::percent_format(scale = 1)) +  # make ratio from 0~1.0 to 0%~100%
+    labs(title = "relationship between genotype and malaria infection ",
+         x = "SNP_5239s1_t", 
+         y = "percent of Infection",
+         fill = "malaria_status (N=unaffected, Y=affected)") +
+    theme_minimal()
+
+genomics_tf_ps %>% 
+  na.omit %>% 
+   filter(island == "PS") %>% 
+    count(x5239s1_t, malaria) %>%
+    group_by(x5239s1_t) %>%
+    mutate(percent = n / sum(n) * 100)%>%
+ggplot(aes(x = factor(x5239s1_t), y=percent,fill = factor(malaria))) +
+    geom_col(position = "dodge") +  # 
+    scale_y_continuous(labels = scales::percent_format(scale = 1)) +  # make ratio from 0~1.0 to 0%~100%
+    labs(title = "relationship between genotype and malaria infection ",
+         x = "SNP_5239s1_t", 
+         y = "percent of Infection",
+         fill = "malaria_status (N=unaffected, Y=affected)") +
+    theme_minimal()
+    
+```
+```{r}
+genomics_tf_ps %>% 
+  na.omit %>% 
+   filter(island == "TF") %>% 
+    count(tlr4_prot_1, malaria) %>%
+    group_by(tlr4_prot_1) %>%
+    mutate(percent = n / sum(n) * 100)%>%
+ggplot(aes(x = factor(tlr4_prot_1), y=percent,fill = factor(malaria))) +
+    geom_col(position = "dodge") +  
+    scale_y_continuous(labels = scales::percent_format(scale = 1)) +  # make ratio from 0~1.0 to 0%~100%
+    labs(title = "relationship between genotype and malaria infection ",
+         x = "TLR4_pro_1", 
+         y = "percent of Infection",
+         fill = "malaria_status (N=unaffected, Y=affected)") +
+    theme_minimal()
+
+genomics_tf_ps %>% 
+  na.omit %>% 
+   filter(island == "PS") %>% 
+    count(tlr4_prot_1, malaria) %>%
+    group_by(tlr4_prot_1) %>%
+    mutate(percent = n / sum(n) * 100)%>%
+ggplot(aes(x = factor(tlr4_prot_1), y=percent,fill = factor(malaria))) +
+    geom_col(position = "dodge") +  # 
+    scale_y_continuous(labels = scales::percent_format(scale = 1)) +  # make ratio from 0~1.0 to 0%~100%
+    labs(title = "relationship between genotype and malaria infection ",
+         x = "TLR4_pro_1", 
+         y = "percent of Infection",
+         fill = "malaria_status (N=unaffected, Y=affected)") +
+    theme_minimal()
+```
+
+
+```{r}
+genomics_tf_ps %>% 
+  filter(island == "TF" & malaria == "Y")%>%  # Select only Tf island
+  na.omit() %>%  # Remove NA values 
+  group_by(distwater_cat) %>% 
+  summarise(n = n()) %>% 
+  ggplot(aes(x = reorder(distwater_cat,n),y = n ,fill = factor(distwater_cat)))+ 
+  geom_col() +  # Dodge bar chart for comparison 
+  labs(title = "TF: Water Distance vs. Malaria Infection",
+       x = "Distance to Water",
+       y = "Percentage of Infection",
+       fill = "Malaria Status (N = Unaffected, Y = Infected)") +
+  theme_minimal()
+genomics_tf_ps %>% 
+  filter(island == "PS" & malaria == "Y") %>%  # 
+  na.omit() %>%   
+  group_by(distwater_cat) %>% 
+  summarise(n = n()) %>%  # 
+  ggplot(aes(x = reorder(distwater_cat, n), y = n, fill = factor(distwater_cat))) + 
+  geom_col() +  
+  labs(title = "PS: Water Distance vs. Malaria Infection",
+       x = "Distance to Water",
+       y = "Number of Infected Cases",
+       fill = "Distance Category") +
+  theme_minimal()
+```
+```{r}
+alt <- quantcut(genomics_tf_ps$altitude)
+table(alt)
+altitude1 <- genomics_tf_ps %>% 
+mutate(altitude_category = case_when(  
+    altitude <= 83 ~ "Low",
+    altitude > 83 & altitude <= 169 ~ "Medium",
+    altitude > 169 & altitude <= 351 ~ "Medium High",
+    altitude > 351 ~ "High" ))
+```
+mutate(distwater_cat = case_when(distwater <= 105 ~ "close",
+                                   distwater > 105 & distwater <= 258 ~ "median close",
+                                   distwater > 258 & distwater <= 725 ~ "median far",
+                                   distwater > 725 ~ "far"))
+```{r}
+
+ altitude1 %>%
+  filter( malaria == "Y") %>%  
+  na.omit() %>%  
+ 
+  group_by(altitude_category) %>%  
+  summarise(n = n()) %>%  
+  ggplot(aes(x = reorder(altitude_category,n), y = n, fill = altitude_category)) + 
+  geom_bar(stat = "identity") +  
+  labs(title = "Tenerife: Malaria Infection by Altitude Category",
+       x = "Altitude Category",
+       y = "Number of Infected Cases") +
+  theme_minimal()
+```
+
+
 
