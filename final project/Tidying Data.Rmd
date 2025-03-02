@@ -31,6 +31,17 @@ ps <- read.csv("data/landscapegenetics/PS_pipits_2016.csv") %>% clean_names() #1
 tf_1 <- tf %>% select(!autocov1000m) #redefine tf as a different df
 tf_ps <- full_join(tf_1,ps) #join all data frames together
 
+# add the word "copies" to all the following
+genomics <- read_csv("data/landscapegenetics/TF_PS_pipits.csv") %>%
+  rename("5239s1.T_copies" = "5239s1.T",
+         "7259s1.A.copies" = "7259s1.A",
+         "TLR4_1.G_copies" = "TLR4_1.G",
+         "TLR4_2.A_copies" = "TLR4_2.A",
+         "TLR4_3.C_copies" = "TLR4_3.C",
+         "TLR4_4.C_copies" = "TLR4_4.C") %>% 
+  clean_names()
+names(genomics) <- sub('^x', "", names(genomics)) #substitute any col names beginning with "x" with a blank string
+genomics_tf_ps <- merge(tf_ps, genomics, by = "sample")
 genomics <- read.csv("data/landscapegenetics/TF_PS_pipits.csv") %>% clean_names()
 genomics_tf_ps <- left_join(tf_ps, genomics, by = "sample")
 ```
