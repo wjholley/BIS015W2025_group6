@@ -6,6 +6,7 @@ library(ggmap)
 library(shiny)
 library(shinydashboard)
 library(bslib)
+library(patchwork)
 
 register_stadiamaps("1d92513d-1a7f-407d-8c65-60d0d510c9c0", write = FALSE)
 
@@ -31,11 +32,16 @@ ui <- page_navbar(
   
   title = "Avians of Tenerife and Porto Santo",
   nav_panel(title = "Porto Santo", p("Mapping options for Porto Santo."),
-            selectInput("pscolor",
-                        "Select what to color samples by:",
-                        choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Farmland" = "distfarm_cat", "Relative Distance from Pollution" = "distpoul_cat"),
-                        selected = ("malaria")),
-            plotOutput("psplot")
+            
+            fluidRow(
+              box(selectInput("pscolor",
+                              "Select what to color samples by:",
+                              choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Farmland" = "distfarm_cat", "Relative Distance from Pollution" = "distpoul_cat"),
+                              selected = ("malaria"))),
+              box(plotOutput("psplot")),
+              box(plotOutput("tfplot"))
+            )
+            
             ),
   
   nav_panel(title = "Tenerife", p("Mapping options for Tenerife."),
@@ -57,10 +63,11 @@ server <- function(input, output, session) {
   
   output$psplot <- renderPlot({
     
-      ggmap(ps_map)+
+    ggmap(ps_map)+
       geom_point(data = ps_coordinates, 
                  aes_string("longitude", "latitude", color = input$pscolor))+
       labs(x = "Longitude", y = "Latitude")
+      
   
     })
 
