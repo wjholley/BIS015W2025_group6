@@ -72,18 +72,35 @@ tf_inputs <-  list(selectInput("tfcolor1",
                                choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Farmland" = "distfarm_cat", "Relative Distance from Pollution" = "distpoul_cat"),
                                selected = ("distwater_cat")))
 
-malaria_cards <- list(
+malaria_cat_cards <- list(
   card(
     full_screen = TRUE,
     card_header("% of Birds Positive for Malaria vs (Your Choice)"),
-    plotOutput("malariaplot")
+    plotOutput("malariacatplot")
   )
 )
 
-malaria_inputs <- list(selectInput("malariacategorical",
+malaria_cat_inputs <- list(selectInput("malariacat",
                                    "Choose what categorical variable to plot malaria against:",
                                    choices = c("Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Farmland" = "distfarm_cat", "Relative Distance from Pollution" = "distpoul_cat"),
                                    selected = ("distwater_cat")))
+
+malaria_cont_cards <- list(
+  card(
+    full_screen = TRUE,
+    card_header("Stats for birds with or without malaria"),
+    plotOutput("malariacontplot")
+  ),
+  card(
+    full_screen = TRUE,
+    card_header("Summary Statistics"),
+  )
+)
+
+malaria_cont_inputs <- list(selectInput("malariacont",
+                                   "Get stats for different continuous variables",
+                                   choices = c("Distance from Water" = "distwater", "Distance from Urban Areas" = "dist_urb", "Distance from Farmland" = "distfarm", "Distance from Pollution" = "distpoul", "Altitude" = "altitude", "Minimum Temperature" = "mintemp"),
+                                   selected = ("distwater")))
 
 ui <- page_navbar(
   
@@ -99,8 +116,22 @@ ui <- page_navbar(
             ),
   
   nav_panel(title = "Malaria vs ...", p("Plotting options for malaria and another variable"),
-            layout_columns(malaria_inputs[[1]]),
-            layout_columns(malaria_cards[[1]])
+            accordion(
+              accordion_panel("Categorical Input",
+            layout_columns(malaria_cat_inputs[[1]]),
+            layout_columns(malaria_cat_cards[[1]])
+              ),
+            accordion_panel("Continuous Input",
+                            layout_columns(malaria_cont_inputs[[1]]),
+                            layout_columns(malaria_cont_cards[[1]], 
+                                             value_box(
+                                               title = "Average bill length",
+                                               value = scales::unit_format(unit = "meters")(),
+                                               showcase = bsicons::bs_icon("align-bottom")
+                                             )
+                                           )
+              )
+            )
   ),
   
   nav_menu(title = "Links",
@@ -111,9 +142,6 @@ ui <- page_navbar(
 )
 
 server <- function(input, output, session) {
-  
-  legendpsplot2 <- reactive({ input$pscolor2 })
-  
   output$psplot1 <- renderPlot({
     
     ggmap(ps_map)+
@@ -123,6 +151,7 @@ server <- function(input, output, session) {
       theme(legend.position = "bottom")+
       labs(x = "Longitude", y = "Latitude")
     })
+  
   output$psplot2 <- renderPlot({
     
     ggmap(ps_map)+
@@ -141,8 +170,8 @@ server <- function(input, output, session) {
       theme_stata()+
       theme(legend.position = "bottom")+
       labs(x = "Longitude", y = "Latitude")
-    
   })
+  
   output$tfplot2 <- renderPlot({
     
     ggmap(tf_map)+
@@ -151,25 +180,28 @@ server <- function(input, output, session) {
       theme_stata()+
       theme(legend.position = "bottom")+
       labs(x = "Longitude", y = "Latitude")
-    
   })
   
-  output$malariaplot <- renderPlot({
+  output$malariacatplot <- renderPlot({
     tf_ps %>% 
-      group_by(malaria, !!sym(input$malariacategorical)) %>% 
+      group_by(malaria, !!sym(input$malariacat)) %>% 
       summarize(n=n(), .groups = 'keep') %>%
-      group_by(!!sym(input$malariacategorical)) %>% 
+      group_by(!!sym(input$malariacat)) %>% 
       mutate(perc = 100*n/sum(n)) %>%
       filter(malaria == "Y") %>%
-      mutate(!!sym(input$malariacategorical) := factor(!!sym(input$malariacategorical), levels = c("close", "median close", "median far", "far"))) %>%
-      ggplot(aes(!!sym(input$malariacategorical), perc, fill = perc))+
+      mutate(!!sym(input$malariacat) := factor(!!sym(input$malariacat), levels = c("close", "median close", "median far", "far"))) %>%
+      ggplot(aes(!!sym(input$malariacat), perc, fill = perc))+
       geom_col(color = "black")+
       scale_y_continuous(limits = c(0, 100))+
       theme_stata()+
       scale_fill_gradient(low = "white", high = "salmon")+  
       labs(y = "Percent of Birds Positive for Malaria")
-      
-    
+  })
+  
+  output$malariacontplot <- renderPlot({
+    tf_ps %>% 
+      ggplot(aes_string(x = "malaria", y = input$malariacont))+
+      geom_boxplot()
   })
   
 }

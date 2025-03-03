@@ -29,6 +29,10 @@ tf_ps %>%
       ggplot(aes(x = distpoul_cat, y = perc))+
       geom_col()
 ```
+```{r}
+names(tf_ps)
+```
+
 
 
 
