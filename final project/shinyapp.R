@@ -115,7 +115,7 @@ ui <- page_navbar(
             layout_columns(tf_cards[[1]], tf_cards[[2]])
             ),
   
-  nav_panel(title = "Malaria vs ...", p("Plotting options for malaria and another variable"),
+  nav_panel(title = "Malaria vs Environmental Factors", p("Plotting options for malaria and an environmental variable"),
             accordion(
               accordion_panel("Categorical Input",
             layout_columns(malaria_cat_inputs[[1]]),
@@ -123,11 +123,20 @@ ui <- page_navbar(
               ),
             accordion_panel("Continuous Input",
                             layout_columns(malaria_cont_inputs[[1]]),
-                            layout_columns(malaria_cont_cards[[1]], 
+                            layout_columns(col_widths = c(6, 3, 3),
+                                            malaria_cont_cards[[1]], 
                                              value_box(
-                                               title = "Average bill length",
-                                               value = scales::unit_format(unit = "meters")(),
-                                               showcase = bsicons::bs_icon("align-bottom")
+                                               title = "Malaria Positive Average",
+                                               value = textOutput("malariapositiveaverage"),
+                                               showcase = bsicons::bs_icon("align-bottom"),
+                                               theme = "red"
+                                             ),
+                                             value_box(
+                                               title = "Malaria Negative Average",
+                                               value = textOutput("malarianegativeaverage"),
+                                               showcase = bsicons::bs_icon("align-bottom"),
+                                               theme = "blue",
+                                               alpha = 0.5
                                              )
                                            )
               )
@@ -166,7 +175,7 @@ server <- function(input, output, session) {
     
     ggmap(tf_map)+
       geom_point(data = tf_coordinates, 
-                 aes_string("longitude", "latitude", group = input$tfcolor, color = input$tfcolor1))+
+                 aes_string("longitude", "latitude", group = input$tfcolor1, color = input$tfcolor1))+
       theme_stata()+
       theme(legend.position = "bottom")+
       labs(x = "Longitude", y = "Latitude")
@@ -176,7 +185,7 @@ server <- function(input, output, session) {
     
     ggmap(tf_map)+
       geom_point(data = tf_coordinates, 
-                 aes_string("longitude", "latitude", group = input$tfcolor, color = input$tfcolor2))+
+                 aes_string("longitude", "latitude", group = input$tfcolor2, color = input$tfcolor2))+
       theme_stata()+
       theme(legend.position = "bottom")+
       labs(x = "Longitude", y = "Latitude")
@@ -199,9 +208,30 @@ server <- function(input, output, session) {
   })
   
   output$malariacontplot <- renderPlot({
-    tf_ps %>% 
+    tf_ps %>%
+      filter(malaria == "Y" | malaria == "N") %>% 
       ggplot(aes_string(x = "malaria", y = input$malariacont))+
-      geom_boxplot()
+      geom_boxplot()+
+      theme_stata()+
+      labs(x = "Malaria Status")
+  })
+  
+  output$malariapositiveaverage <- renderText({
+    tf_ps %>%
+      group_by(malaria) %>% 
+      filter(malaria == "Y") %>% 
+      summarize(average_variable = mean(!!sym(input$malariacont))) %>% 
+      select(average_variable) %>% 
+      .[[1]]
+  })
+  
+  output$malarianegativeaverage <- renderText({
+    tf_ps %>%
+      group_by(malaria) %>% 
+      filter(malaria == "N") %>% 
+      summarize(average_variable = mean(!!sym(input$malariacont))) %>% 
+      select(average_variable) %>% 
+      .[[1]]
   })
   
 }

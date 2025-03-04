@@ -32,6 +32,15 @@ tf_ps %>%
 ```{r}
 names(tf_ps)
 ```
+```{r}
+tf_ps %>%
+      group_by(malaria) %>% 
+      filter(malaria == "Y") %>% 
+      summarize(average_variable = mean(distwater)) %>% 
+      select(average_variable) %>% 
+      .[[1]]
+```
+
 
 
 
