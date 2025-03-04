@@ -136,7 +136,6 @@ ui <- page_navbar(
                                                value = textOutput("malarianegativeaverage"),
                                                showcase = bsicons::bs_icon("align-bottom"),
                                                theme = "blue",
-                                               alpha = 0.5
                                              )
                                            )
               )
