@@ -7,6 +7,7 @@ library(shiny)
 library(shinydashboard)
 library(bslib)
 library(ggthemes)
+library(thematic)
 
 thematic::thematic_shiny(font = "auto")
 
