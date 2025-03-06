@@ -43,11 +43,11 @@ ps_cards <- list(
 
 ps_inputs <-  list(selectInput("pscolor1",
                           "Select what to color samples by for map #1:",
-                          choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Farmland" = "distfarm_cat", "Relative Distance from Pollution" = "distpoul_cat"),
+                          choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Livestock Farms" = "distfarm_cat", "Relative Distance from Poultry Farms" = "distpoul_cat"),
                           selected = ("malaria")),
                   selectInput("pscolor2",
                                "Select what to color samples by for map #2:",
-                               choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Farmland" = "distfarm_cat", "Relative Distance from Pollution" = "distpoul_cat"),
+                               choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Livestock Farms" = "distfarm_cat", "Relative Distance from Poultry Farms" = "distpoul_cat"),
                                selected = ("distwater_cat")))
 
 tf_cards <- list(
@@ -65,11 +65,11 @@ tf_cards <- list(
 
 tf_inputs <-  list(selectInput("tfcolor1",
                                "Select what to color samples by for map #1:",
-                               choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Farmland" = "distfarm_cat", "Relative Distance from Pollution" = "distpoul_cat"),
+                               choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Livestock Farms" = "distfarm_cat", "Relative Distance from Poultry Farms" = "distpoul_cat"),
                                selected = ("malaria")),
                    selectInput("tfcolor2",
                                "Select what to color samples by for map #2:",
-                               choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Farmland" = "distfarm_cat", "Relative Distance from Pollution" = "distpoul_cat"),
+                               choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Livestock Farms" = "distfarm_cat", "Relative Distance from Poultry Farms" = "distpoul_cat"),
                                selected = ("distwater_cat")))
 
 malaria_cat_cards <- list(
@@ -82,7 +82,7 @@ malaria_cat_cards <- list(
 
 malaria_cat_inputs <- list(selectInput("malariacat",
                                    "Choose what categorical variable to plot malaria against:",
-                                   choices = c("Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Farmland" = "distfarm_cat", "Relative Distance from Pollution" = "distpoul_cat"),
+                                   choices = c("Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Livestock Farms" = "distfarm_cat", "Relative Distance from Poulty Farms" = "distpoul_cat"),
                                    selected = ("distwater_cat")))
 
 malaria_cont_cards <- list(
@@ -99,7 +99,7 @@ malaria_cont_cards <- list(
 
 malaria_cont_inputs <- list(selectInput("malariacont",
                                    "Get stats for different continuous variables",
-                                   choices = c("Distance from Water" = "distwater", "Distance from Urban Areas" = "dist_urb", "Distance from Farmland" = "distfarm", "Distance from Pollution" = "distpoul", "Altitude" = "altitude", "Minimum Temperature" = "mintemp"),
+                                   choices = c("Distance from Water" = "distwater", "Distance from Urban Areas" = "dist_urb", "Distance from Livestock Farms" = "distfarm", "Distance from Poultry Farms" = "distpoul", "Altitude" = "altitude", "Minimum Temperature" = "mintemp"),
                                    selected = ("distwater")))
 
 ui <- page_navbar(
