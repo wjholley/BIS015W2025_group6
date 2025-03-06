@@ -8,6 +8,8 @@ library(shinydashboard)
 library(bslib)
 library(ggthemes)
 
+thematic::thematic_shiny(font = "auto")
+
 register_stadiamaps("1d92513d-1a7f-407d-8c65-60d0d510c9c0", write = FALSE)
 
 tf_ps <- read_csv("data/landscapegenetics/genomics_tf_ps.csv")
@@ -27,6 +29,13 @@ ps_map <- get_stadiamap(ps_bbox, maptype = "stamen_terrain", zoom=14)
 
 ps_coordinates <- tf_ps %>% 
   filter(island == "PS")
+
+project_theme <- bs_theme(
+  bg = "#ADD8E6", fg = "black", primary = "#FCC780",
+  font_scale = 1.5,
+  base_font = font_google("Inter"),
+  code_font = font_google("Inter"),
+)
 
 ps_cards <- list(
                   card(
@@ -102,9 +111,10 @@ malaria_cont_inputs <- list(selectInput("malariacont",
                                    choices = c("Distance from Water" = "distwater", "Distance from Urban Areas" = "dist_urb", "Distance from Livestock Farms" = "distfarm", "Distance from Poultry Farms" = "distpoul", "Altitude" = "altitude", "Minimum Temperature" = "mintemp"),
                                    selected = ("distwater")))
 
+##Beginning of the app itself/UI Section
 ui <- page_navbar(
-  
   title = "Avians of Tenerife and Porto Santo",
+  theme = project_theme,
   nav_panel(title = "Porto Santo", p("Mapping options for Porto Santo."),
             layout_columns(ps_inputs[[1]], ps_inputs[[2]]),
             layout_columns(ps_cards[[1]], ps_cards[[2]])
@@ -135,11 +145,10 @@ ui <- page_navbar(
                                                title = "Malaria Negative Average",
                                                value = textOutput("malarianegativeaverage"),
                                                showcase = bsicons::bs_icon("align-bottom"),
-                                               theme = "blue",
-                                             )
-                                           )
-              )
-            )
+                                               theme = "blue"))))
+              ),
+  nav_panel(title = "Malaria vs Genetic Factors", p("Plotting options for malaria and a genome-related variable"),
+        
   ),
   
   nav_menu(title = "Links",
@@ -149,6 +158,7 @@ ui <- page_navbar(
            ),
 )
 
+##Server functions
 server <- function(input, output, session) {
   output$psplot1 <- renderPlot({
     
