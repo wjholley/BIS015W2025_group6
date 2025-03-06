@@ -44,6 +44,9 @@ snp_plot_data <- genomics_tf_ps %>%
 snp_plot_data %>% 
   ggplot(aes(malaria, perc))+
   geom_col()+
-  facet_grid(x5239s1_a~x5239s1_t)
+  facet_grid(x5239s1_a~x5239s1_t, labeller = label_both)+
+  labs(y = "Percent of Population",
+       x = NULL,
+       title = "Absence or Presence of Malaria by SNP Allele")
 ```
 
