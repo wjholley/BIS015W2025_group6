@@ -32,7 +32,7 @@ ps_coordinates <- tf_ps %>%
   filter(island == "PS")
 
 project_theme <- bs_theme(
-  bg = "#ADD8E6", fg = "black", primary = "#FCC780",
+  bg = "#ADDE8B", fg = "black", primary = "#FCC780",
   font_scale = 1.5,
   base_font = font_google("Inter"),
   code_font = font_google("Inter"),
