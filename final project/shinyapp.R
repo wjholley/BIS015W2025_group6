@@ -112,6 +112,18 @@ malaria_cont_inputs <- list(selectInput("malariacont",
                                    choices = c("Distance from Water" = "distwater", "Distance from Urban Areas" = "dist_urb", "Distance from Livestock Farms" = "distfarm", "Distance from Poultry Farms" = "distpoul", "Altitude" = "altitude", "Minimum Temperature" = "mintemp"),
                                    selected = ("distwater")))
 
+malaria_genetics_input <- list(selectInput("protein", "Select TLR4 Protein Variant:", 
+                          choices = c("tlr4_prot_1", "tlr4_prot_2", "tlr4_prot_3", "tlr4_prot_4"), 
+                          selected = "tlr4_prot_1"))
+
+malaria_genetics_cards <- list(
+  card(
+    full_screen = TRUE,
+    card_header("TLR4 Protein Variants & Malaria Infection"),
+    plotOutput("TLR4plot")
+  )
+)
+
 ##Beginning of the app itself/UI Section
 ui <- page_navbar(
   title = "Avians of Tenerife and Porto Santo",
@@ -149,6 +161,8 @@ ui <- page_navbar(
                                                theme = "blue"))))
               ),
   nav_panel(title = "Malaria vs Genetic Factors", p("Plotting options for malaria and a genome-related variable"),
+            layout_columns(malaria_genetics_input[[1]]),
+            layout_columns(malaria_genetics_cards[[1]])
         
   ),
   
@@ -242,6 +256,23 @@ server <- function(input, output, session) {
       summarize(average_variable = mean(!!sym(input$malariacont))) %>% 
       select(average_variable) %>% 
       .[[1]]
+  })
+  
+  output$TLR4plot <- renderPlot({
+    tf_ps %>% 
+      filter(!!sym(input$protein) == "present" | !!sym(input$protein) == "absent") %>% 
+      group_by(malaria, !!sym(input$protein), island) %>%
+      summarize(n=n(), .groups = 'keep') %>% 
+      group_by(!!sym(input$protein), island) %>% 
+      mutate(perc = 100*n/sum(n)) %>% 
+      ggplot(aes(x = !!sym(input$protein), y = perc, fill = malaria))+
+      geom_col(pos = "dodge")+
+      facet_wrap(~island, ncol = 2)+
+      labs(title = paste("Effect of", input$protein, "on Malaria Infection"),
+        x = input$protein,
+        y = "Percent of Infection",
+        fill = "Malaria Status (N=unaffected, Y=affected)")+
+      theme_stata()
   })
   
 }
