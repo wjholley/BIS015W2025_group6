@@ -54,11 +54,34 @@ snp_plot_data %>%
 library(shiny)
 
 ui <- fluidPage(
-  
+  selectInput("x",
+              "X variable",
+              c("x5239s1_a","x5239s1_t", "x7259s1_a","x7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
+              selected = "x5239s1"),
+  selectInput("y",
+              "Y variable",
+              c("x5239s1_a","x5239s1_t", "x7259s1_a","x7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
+              selected = "x5239s1"),
+  plotOutput("facet_plot")
 )
 
 server <- function(input, output, session) {
-  
+  output$facet_plot <- renderPlot({
+    snp_plot_data <- genomics_tf_ps %>% 
+  filter(!is.na(malaria)&!is.na(!!sym(input$x))&!is.na(!!sym(input$y))) %>%
+  group_by(malaria, !!sym(input$x), !!sym(input$y)) %>% 
+  summarize(n=n(), .groups = 'keep') %>%
+  group_by(!!(input$x), !!sym(input$y)) %>% 
+  mutate(perc = 100*n/sum(n))
+
+snp_plot_data %>% 
+  ggplot(aes(malaria, perc))+
+  geom_col()+
+  facet_grid(get(input$x)~get(input$y), labeller = label_both)+
+  labs(y = "Percent of Population",
+       x = NULL,
+       title = "Absence or Presence of Malaria by SNP Allele")
+  })
 }
 
 shinyApp(ui, server)
