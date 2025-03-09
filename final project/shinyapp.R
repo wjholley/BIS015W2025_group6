@@ -147,12 +147,12 @@ faceting_cards <- list(
 faceting_inputs <- list(
   selectInput("x_faceting",
               "X variable",
-              choices = c("5239s1_a","5239s1_t", "7259s1_a","7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
-              selected = "5239s1_a"),
+              choices = c("x5239s1_a","x5239s1_t", "x7259s1_a","x7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
+              selected = "x5239s1_a"),
   selectInput("y_faceting",
               "Y variable",
-              choices = c("5239s1_a","5239s1_t", "7259s1_a","7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
-              selected = "5239s1_t")
+              choices = c("x5239s1_a","x5239s1_t", "x7259s1_a","x7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
+              selected = "x5239s1_t")
 )
 
 ##Beginning of the app itself/UI Section
@@ -332,7 +332,7 @@ server <- function(input, output, session) {
       group_by(!!sym(input$protein), island) %>% 
       mutate(perc = 100*n/sum(n)) %>%
       ggplot(aes(x = malaria, y = perc, fill = !!sym(input$protein)))+
-      geom_col(color = "black", position = "dodge")+
+      geom_col(color = "black", position = "dodge", alpha = 0.5)+
       facet_grid(island ~ .)+
       labs(title = paste("Effect of", input$protein, "on Malaria Infection"),
         x = "Malaria",
@@ -395,7 +395,7 @@ server <- function(input, output, session) {
       group_by(!!sym(input$snp), island) %>% 
       mutate(perc = 100*n/sum(n)) %>% 
       ggplot(aes(x = malaria, y = perc, fill = !!sym(input$snp)))+
-      geom_col(color = "black", position = "dodge")+
+      geom_col(color = "black", position = "dodge", alpha = 0.5)+
       facet_grid(. ~ island)+
       labs(title = paste("Effect of", input$snp, "on Malaria Infection"),
            x = "Malaria",
@@ -403,6 +403,26 @@ server <- function(input, output, session) {
            fill = "SNP variant specified")+
       theme_stata()
   })
-}
 
+output$facetingplot <- renderPlot({
+  snp_plot_data <- genomics_tf_ps %>% 
+    filter(!is.na(malaria)&!is.na(!!sym(input$x_faceting))&!is.na(!!sym(input$y_faceting))) %>%
+    group_by(malaria, !!sym(input$x_faceting), !!sym(input$y_faceting)) %>% 
+    summarize(n=n(), .groups = 'keep') %>%
+    group_by(!!(input$x_faceting), !!sym(input$y_faceting)) %>% 
+    mutate(perc = 100*n/sum(n))
+  
+  snp_plot_data %>% 
+    ggplot(aes(malaria, perc, fill = malaria))+
+    geom_col(color = "black", alpha = 0.5)+
+    facet_grid(as.formula(paste(input$y_faceting, "~", input$x_faceting)), labeller = label_both) +
+    labs(y = "Percent of Population",
+         x = NULL,
+         title = "Absence or Presence of Malaria by SNP Allele")+
+    theme_stata()
+})
+
+}
 shinyApp(ui, server)
+
+#facet_grid(get(input$x_faceting)~get(input$y_faceting, labeller = label_both))+
