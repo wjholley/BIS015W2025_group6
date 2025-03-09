@@ -50,3 +50,18 @@ snp_plot_data %>%
        title = "Absence or Presence of Malaria by SNP Allele")
 ```
 
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  
+)
+
+server <- function(input, output, session) {
+  
+}
+
+shinyApp(ui, server)
+```
+
+
