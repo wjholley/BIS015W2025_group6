@@ -136,6 +136,25 @@ malaria_snp_cards <- list(
   )
 )
 
+faceting_cards <- list(
+  card(
+    full_screen = TRUE,
+    card_header("SNP genotypes & Malaria Infection"),
+    plotOutput("facetingplot")
+  )
+)
+
+faceting_inputs <- list(
+  selectInput("x_faceting",
+              "X variable",
+              choices = c("5239s1_a","5239s1_t", "7259s1_a","7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
+              selected = "5239s1_a"),
+  selectInput("y_faceting",
+              "Y variable",
+              choices = c("5239s1_a","5239s1_t", "7259s1_a","7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
+              selected = "5239s1_t")
+)
+
 ##Beginning of the app itself/UI Section
 ui <- page_navbar(
   title = "Avians of Tenerife and Porto Santo",
@@ -208,6 +227,10 @@ ui <- page_navbar(
                             )
                       )
   ),
+  nav_panel(title = "Faceting for Genetic Factors", p("Plotting options for malaria and two genome-related variables"),
+            layout_columns(faceting_inputs[[1]], faceting_inputs[[2]]),
+            layout_columns(faceting_cards[[1]])
+            ),
   
   nav_menu(title = "Links",
            nav_item(tags$a("Study", href = "https://pmc.ncbi.nlm.nih.gov/articles/PMC6875583/")),
