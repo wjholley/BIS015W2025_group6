@@ -124,6 +124,18 @@ malaria_genetics_cards <- list(
   )
 )
 
+malaria_snp_input <- list(selectInput("snp", "Select SNP Genotype:", 
+                                      choices = c("5239s1", "7259s1"), 
+                                      selected = "5239s1"))
+
+malaria_snp_cards <- list(
+  card(
+    full_screen = TRUE,
+    card_header("SNP genotypes & Malaria Infection"),
+    plotOutput("snpplot")
+  )
+)
+
 ##Beginning of the app itself/UI Section
 ui <- page_navbar(
   title = "Avians of Tenerife and Porto Santo",
@@ -161,6 +173,8 @@ ui <- page_navbar(
                                                theme = "blue"))))
               ),
   nav_panel(title = "Malaria vs Genetic Factors", p("Plotting options for malaria and a genome-related variable"),
+            accordion(
+              accordion_panel("TLR4 Haplotypes",
             layout_columns(malaria_genetics_input[[1]]),
             layout_columns(col_widths = c(6, 3, 3),
                             malaria_genetics_cards[[1]],
@@ -173,7 +187,7 @@ ui <- page_navbar(
                                title = "% of all samples with selected haplotype from Tenerife with malaria",
                                value = textOutput("tenerifeselectpositive"),
                                theme = "green"
-                             ),
+                             )
                             ),
                             column(12, value_box(
                                title = "% of all samples from Porto Santo with malaria",
@@ -184,11 +198,15 @@ ui <- page_navbar(
                                title = "% of all samples with selected haplotype from Porto Santo with malaria",
                                value = textOutput("portosantoselectpositive"),
                                theme = "blue"
-                             )
+                              )
                             )
-                         )
-            
-        
+                          )
+                        ),
+            accordion_panel("SNP Genotype",
+                            layout_columns(malaria_snp_input[[1]]),
+                            layout_columns(malaria_snp_cards[[1]])
+                            )
+                      )
   ),
   
   nav_menu(title = "Links",
@@ -289,14 +307,14 @@ server <- function(input, output, session) {
       group_by(malaria, !!sym(input$protein), island) %>%
       summarize(n=n(), .groups = 'keep') %>% 
       group_by(!!sym(input$protein), island) %>% 
-      mutate(perc = 100*n/sum(n)) %>% 
-      ggplot(aes(x = !!sym(input$protein), y = perc, fill = malaria))+
-      geom_col(pos = "dodge")+
-      facet_wrap(~island, ncol = 2)+
+      mutate(perc = 100*n/sum(n)) %>%
+      ggplot(aes(x = malaria, y = perc, fill = !!sym(input$protein)))+
+      geom_col(color = "black", position = "dodge")+
+      facet_grid(island ~ .)+
       labs(title = paste("Effect of", input$protein, "on Malaria Infection"),
-        x = input$protein,
-        y = "Percent of Infection",
-        fill = "Malaria Status (N=unaffected, Y=affected)")+
+        x = "Malaria",
+        y = "Percent",
+        fill = "TLR4 variant specified")+
       theme_stata()
   })
   
@@ -346,6 +364,22 @@ server <- function(input, output, session) {
       .[[2]]
   })
   
+  output$snpplot <- renderPlot({
+    tf_ps %>%  
+      filter(!!sym(input$snp) == "AA" | !!sym(input$snp) == "AT" | !!sym(input$snp) == "TT") %>%
+      group_by(malaria, !!sym(input$snp), island) %>%
+      summarize(n=n(), .groups = 'keep') %>% 
+      group_by(!!sym(input$snp), island) %>% 
+      mutate(perc = 100*n/sum(n)) %>% 
+      ggplot(aes(x = malaria, y = perc, fill = !!sym(input$snp)))+
+      geom_col(color = "black", position = "dodge")+
+      facet_grid(. ~ island)+
+      labs(title = paste("Effect of", input$snp, "on Malaria Infection"),
+           x = "Malaria",
+           y = "Percent",
+           fill = "SNP variant specified")+
+      theme_stata()
+  })
 }
 
 shinyApp(ui, server)
