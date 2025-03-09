@@ -40,6 +40,18 @@ tf_ps %>%
       select(average_variable) %>% 
       .[[1]]
 ```
+```{r}
+tf_ps %>%
+      filter(island == "TF") %>% 
+      group_by(malaria, tlr4_prot_1) %>%
+      summarize(n=n(), .groups = 'keep') %>% 
+      group_by(tlr4_prot_1) %>% 
+      mutate(perc = 100*n/sum(n)) %>% 
+      filter(malaria == "Y" & tlr4_prot_1 == "present") %>% 
+      select(perc) %>% 
+      .[[2]]
+```
+
 
 
 

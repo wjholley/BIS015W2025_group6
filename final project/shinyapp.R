@@ -35,7 +35,7 @@ project_theme <- bs_theme(
   bg = "#ADDE8B", fg = "black", primary = "#FCC780",
   font_scale = 1.5,
   base_font = font_google("Inter"),
-  code_font = font_google("Inter"),
+  code_font = font_google("Inter")
 )
 
 ps_cards <- list(
@@ -103,7 +103,7 @@ malaria_cont_cards <- list(
   ),
   card(
     full_screen = TRUE,
-    card_header("Summary Statistics"),
+    card_header("Summary Statistics")
   )
 )
 
@@ -112,14 +112,14 @@ malaria_cont_inputs <- list(selectInput("malariacont",
                                    choices = c("Distance from Water" = "distwater", "Distance from Urban Areas" = "dist_urb", "Distance from Livestock Farms" = "distfarm", "Distance from Poultry Farms" = "distpoul", "Altitude" = "altitude", "Minimum Temperature" = "mintemp"),
                                    selected = ("distwater")))
 
-malaria_genetics_input <- list(selectInput("protein", "Select TLR4 Protein Variant:", 
-                          choices = c("tlr4_prot_1", "tlr4_prot_2", "tlr4_prot_3", "tlr4_prot_4"), 
+malaria_genetics_input <- list(selectInput("protein", "Select TLR4 Haploid:", 
+                          choices = c("TLR4 Protein 1" = "tlr4_prot_1", "TLR4 Protein 2" = "tlr4_prot_2", "TLR4 Protein 3" = "tlr4_prot_3", "TLR4 Protein 4" = "tlr4_prot_4"), 
                           selected = "tlr4_prot_1"))
 
 malaria_genetics_cards <- list(
   card(
     full_screen = TRUE,
-    card_header("TLR4 Protein Variants & Malaria Infection"),
+    card_header("TLR4 Haplotypes & Malaria Infection"),
     plotOutput("TLR4plot")
   )
 )
@@ -162,7 +162,32 @@ ui <- page_navbar(
               ),
   nav_panel(title = "Malaria vs Genetic Factors", p("Plotting options for malaria and a genome-related variable"),
             layout_columns(malaria_genetics_input[[1]]),
-            layout_columns(malaria_genetics_cards[[1]])
+            layout_columns(col_widths = c(6, 3, 3),
+                            malaria_genetics_cards[[1]],
+                            column(12, value_box(
+                               title = "% of all samples from Tenerife with malaria",
+                               value = textOutput("tenerifepositive"),
+                               theme = "green"
+                             ),
+                             value_box(
+                               title = "% of all samples with selected haplotype from Tenerife with malaria",
+                               value = textOutput("tenerifeselectpositive"),
+                               theme = "green"
+                             ),
+                            ),
+                            column(12, value_box(
+                               title = "% of all samples from Porto Santo with malaria",
+                               value = textOutput("portosantopositive"),
+                               theme = "blue"
+                             ),
+                             value_box(
+                               title = "% of all samples with selected haplotype from Porto Santo with malaria",
+                               value = textOutput("portosantoselectpositive"),
+                               theme = "blue"
+                             )
+                            )
+                         )
+            
         
   ),
   
@@ -170,7 +195,7 @@ ui <- page_navbar(
            nav_item(tags$a("Study", href = "https://pmc.ncbi.nlm.nih.gov/articles/PMC6875583/")),
            nav_item(tags$a("Data", href = "https://datadryad.org/dataset/doi:10.5061/dryad.228986b")),
            nav_item(tags$a("Our Github", href = "https://github.com/wjholley/BIS15W2025_group6"))
-           ),
+           )
 )
 
 ##Server functions
@@ -273,6 +298,52 @@ server <- function(input, output, session) {
         y = "Percent of Infection",
         fill = "Malaria Status (N=unaffected, Y=affected)")+
       theme_stata()
+  })
+  
+  output$tenerifepositive <- renderText({
+    tf_ps %>%
+      filter(island == "TF") %>% 
+      group_by(malaria) %>% 
+      summarize(n=n(), groups = 'keep') %>%
+      mutate(perc = 100*n/sum(n)) %>% 
+      filter(malaria == "Y") %>% 
+      select(perc) %>%
+      .[[1]]
+  })
+  
+  output$tenerifeselectpositive <- renderText({
+    tf_ps %>%
+      filter(island == "TF") %>%
+      group_by(malaria, !!sym(input$protein)) %>%
+      summarize(n=n(), .groups = 'keep') %>% 
+      group_by(!!sym(input$protein)) %>% 
+      mutate(perc = 100*n/sum(n)) %>% 
+      filter(malaria == "Y" & !!sym(input$protein) == "present") %>% 
+      select(perc) %>% 
+      .[[2]]
+  })
+  
+  output$portosantopositive <- renderText({
+    tf_ps %>%
+      filter(island == "PS") %>% 
+      group_by(malaria) %>% 
+      summarize(n=n(), groups = 'keep') %>%
+      mutate(perc = 100*n/sum(n)) %>% 
+      filter(malaria == "Y") %>% 
+      select(perc) %>%
+      .[[1]]
+  })
+  
+  output$portosantoselectpositive <- renderText({
+    tf_ps %>%
+      filter(island == "PS") %>%
+      group_by(malaria, !!sym(input$protein)) %>%
+      summarize(n=n(), .groups = 'keep') %>% 
+      group_by(!!sym(input$protein)) %>% 
+      mutate(perc = 100*n/sum(n)) %>% 
+      filter(malaria == "Y" & !!sym(input$protein) == "present") %>% 
+      select(perc) %>% 
+      .[[2]]
   })
   
 }
