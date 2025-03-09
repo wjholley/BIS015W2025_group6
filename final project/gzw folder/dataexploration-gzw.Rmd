@@ -278,9 +278,8 @@ mutate(distwater_cat = case_when(distwater <= 105 ~ "close",
   theme_minimal()
 ```
 
-#this shinyapp only contains the tlr4_prot_1 to prot_4, without x5239s1, x5239s1_t, x7259s1 and altitude
+#this shinyapp contains TLR4 prot-1 to prot-4 and also x5239s1, and its T allele and x7259s1 gene
 ```{r}
-
 
 ui <- fluidPage(
     theme = shinytheme("cosmo"),
@@ -289,102 +288,184 @@ ui <- fluidPage(
     
     sidebarLayout(
         sidebarPanel(
-            selectInput("protein", "Select TLR4 Protein Variant:", 
-                        choices = c("tlr4_prot_1", "tlr4_prot_2", "tlr4_prot_3", "tlr4_prot_4"), 
-                        selected = "tlr4_prot_1")
+            selectInput("protein", "Select TLR4 haplotype:", 
+                        choices = c("None", "tlr4_prot_1", "tlr4_prot_2", "tlr4_prot_3", "tlr4_prot_4"), 
+                        selected = "None"),
+            
+            selectInput("snp", "Select SNP Genotype:", 
+                        choices = c("None", "x5239s1", "x7259s1"), 
+                        selected = "None")
         ),
         
         mainPanel(
+            # show TLR4 haplotype plots in TF and PS 
             conditionalPanel(
-                condition = "input.protein == 'tlr4_prot_1'",
-                h3("TLR4_Prot_1 - TF Island"),
-                plotOutput("malariaPlot_TF"),
-                h3("TLR4_Prot_1 - PS Island"),
-                plotOutput("malariaPlot_PS")
+                condition = "input.protein != 'None'",
+                h3("TLR4 Protein Variant - TF Island"),
+                plotOutput("proteinPlot_TF"),
+                h3("TLR4 Protein Variant - PS Island"),
+                plotOutput("proteinPlot_PS")
+            ),
+            
+            # SNP part
+            conditionalPanel(
+                condition = "input.snp == 'x5239s1'",
+                h3("SNP_5239s1 - General"),
+                plotOutput("plot_x5239s1"),
+                h3("SNP_5239s1_T - TF Island"),
+                plotOutput("plot_x5239s1_t_TF"),
+                h3("SNP_5239s1_T - PS Island"),
+                plotOutput("plot_x5239s1_t_PS")
             ),
             
             conditionalPanel(
-                condition = "input.protein != 'tlr4_prot_1'",
-                h3("Malaria Infection vs TLR4 Protein Variant"),
-                plotOutput("malariaPlot")
+                condition = "input.snp == 'x7259s1'",
+                h3("SNP_7259s1 - General"),
+                plotOutput("plot_x7259s1")
             )
         )
     )
 )
 
-
+# Define Server
 server <- function(input, output) {
     
-    # general plot（apply only to tlr4_prot_2 ~ tlr4_prot_4）
-    output$malariaPlot <- renderPlot({
-        if (input$protein != "tlr4_prot_1") {
-            selected_var <- input$protein
-            
-            genomics_tf_ps %>%
-                na.omit() %>%
-                count(!!sym(selected_var), malaria) %>%
-                group_by(!!sym(selected_var)) %>%
-                mutate(percent = n / sum(n) * 100) %>%
-                ggplot(aes(x = factor(!!sym(selected_var)), y = percent, fill = factor(malaria))) +
-                geom_col(position = "dodge") +
-                scale_y_continuous(labels = scales::percent_format(scale = 1)) +
-                labs(
-                    title = paste("Effect of", selected_var, "on Malaria Infection"),
-                    x = selected_var,
-                    y = "Percent of Infection",
-                    fill = "Malaria Status (N=unaffected, Y=affected)"
-                ) +
-                theme_minimal()
-        }
+    # Plot for TLR4 haplotype (TF Island)
+    output$proteinPlot_TF <- renderPlot({
+        req(input$protein != "None")
+        selected_var <- input$protein
+        
+        genomics_tf_ps %>%
+            na.omit() %>%
+            filter(island == "TF") %>%
+            count(!!sym(selected_var), malaria) %>%
+            group_by(!!sym(selected_var)) %>%
+            mutate(percent = n / sum(n) * 100) %>%
+            ggplot(aes(x = factor(!!sym(selected_var)), y = percent, fill = factor(malaria))) +
+            geom_col(position = "dodge") +
+            scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+            labs(
+                title = paste("Effect of", selected_var, "on Malaria Infection (TF Island)"),
+                x = selected_var,
+                y = "Percent of Infection",
+                fill = "Malaria Status (N=unaffected, Y=affected)"
+            ) +
+            theme_minimal()
+    })
+
+    # Plot for TLR4 haplotype (PS Island)
+    output$proteinPlot_PS <- renderPlot({
+        req(input$protein != "None")
+        selected_var <- input$protein
+        
+        genomics_tf_ps %>%
+            na.omit() %>%
+            filter(island == "PS") %>%
+            count(!!sym(selected_var), malaria) %>%
+            group_by(!!sym(selected_var)) %>%
+            mutate(percent = n / sum(n) * 100) %>%
+            ggplot(aes(x = factor(!!sym(selected_var)), y = percent, fill = factor(malaria))) +
+            geom_col(position = "dodge") +
+            scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+            labs(
+                title = paste("Effect of", selected_var, "on Malaria Infection (PS Island)"),
+                x = selected_var,
+                y = "Percent of Infection",
+                fill = "Malaria Status (N=unaffected, Y=affected)"
+            ) +
+            theme_minimal()
     })
     
-    # TLR4_Prot_1 - TF Island
-    output$malariaPlot_TF <- renderPlot({
-        if (input$protein == "tlr4_prot_1") {
-            genomics_tf_ps %>%
-                na.omit() %>%
-                filter(island == "TF") %>% 
-                count(tlr4_prot_1, malaria) %>%
-                group_by(tlr4_prot_1) %>%
-                mutate(percent = n / sum(n) * 100) %>%
-                ggplot(aes(x = factor(tlr4_prot_1), y = percent, fill = factor(malaria))) +
-                geom_col(position = "dodge") +
-                scale_y_continuous(labels = scales::percent_format(scale = 1)) +
-                labs(
-                    title = "Relationship between TLR4_Prot_1 and Malaria Infection (TF Island)",
-                    x = "TLR4_Prot_1",
-                    y = "Percent of Infection",
-                    fill = "Malaria Status (N=unaffected, Y=affected)"
-                ) +
-                theme_minimal()
-        }
+    # Plot for x5239s1
+    output$plot_x5239s1 <- renderPlot({
+        req(input$snp == "x5239s1")
+        
+        genomics_tf_ps %>%
+            na.omit() %>%
+            count(x5239s1, malaria) %>%
+            group_by(x5239s1) %>%
+            mutate(percent = n / sum(n) * 100) %>%
+            ggplot(aes(x = factor(x5239s1), y = percent, fill = factor(malaria))) +
+            geom_col(position = "dodge") +
+            scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+            labs(
+                title = "Relationship between x5239s1 Genotype and Malaria Infection",
+                x = "x5239s1",
+                y = "Percent of Infection",
+                fill = "Malaria Status (N=unaffected, Y=affected)"
+            ) +
+            theme_minimal()
     })
     
-    # TLR4_Prot_1 - PS Island
-    output$malariaPlot_PS <- renderPlot({
-        if (input$protein == "tlr4_prot_1") {
-            genomics_tf_ps %>%
-                na.omit() %>%
-                filter(island == "PS") %>% 
-                count(tlr4_prot_1, malaria) %>%
-                group_by(tlr4_prot_1) %>%
-                mutate(percent = n / sum(n) * 100) %>%
-                ggplot(aes(x = factor(tlr4_prot_1), y = percent, fill = factor(malaria))) +
-                geom_col(position = "dodge") +
-                scale_y_continuous(labels = scales::percent_format(scale = 1)) +
-                labs(
-                    title = "Relationship between TLR4_Prot_1 and Malaria Infection (PS Island)",
-                    x = "TLR4_Prot_1",
-                    y = "Percent of Infection",
-                    fill = "Malaria Status (N=unaffected, Y=affected)"
-                ) +
-                theme_minimal()
-        }
+    # Plot for x5239s1_t (TF Island)
+    output$plot_x5239s1_t_TF <- renderPlot({
+        req(input$snp == "x5239s1")
+        
+        genomics_tf_ps %>%
+            na.omit() %>%
+            filter(island == "TF") %>% 
+            count(x5239s1_t, malaria) %>%
+            group_by(x5239s1_t) %>%
+            mutate(percent = n / sum(n) * 100) %>%
+            ggplot(aes(x = factor(x5239s1_t), y = percent, fill = factor(malaria))) +
+            geom_col(position = "dodge") +
+            scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+            labs(
+                title = "Relationship between x5239s1_t Genotype and Malaria Infection (TF Island)",
+                x = "SNP_5239s1_t",
+                y = "Percent of Infection",
+                fill = "Malaria Status (N=unaffected, Y=affected)"
+            ) +
+            theme_minimal()
+    })
+    
+    # Plot for x5239s1_t (PS Island)
+    output$plot_x5239s1_t_PS <- renderPlot({
+        req(input$snp == "x5239s1")
+        
+        genomics_tf_ps %>%
+            na.omit() %>%
+            filter(island == "PS") %>% 
+            count(x5239s1_t, malaria) %>%
+            group_by(x5239s1_t) %>%
+            mutate(percent = n / sum(n) * 100) %>%
+            ggplot(aes(x = factor(x5239s1_t), y = percent, fill = factor(malaria))) +
+            geom_col(position = "dodge") +
+            scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+            labs(
+                title = "Relationship between x5239s1_t Genotype and Malaria Infection (PS Island)",
+                x = "SNP_5239s1_t",
+                y = "Percent of Infection",
+                fill = "Malaria Status (N=unaffected, Y=affected)"
+            ) +
+            theme_minimal()
+    })
+
+    # Plot for x7259s1
+    output$plot_x7259s1 <- renderPlot({
+        req(input$snp == "x7259s1")
+        
+        genomics_tf_ps %>%
+            na.omit() %>%
+            count(x7259s1, malaria) %>%
+            group_by(x7259s1) %>%
+            mutate(percent = n / sum(n) * 100) %>%
+            ggplot(aes(x = factor(x7259s1), y = percent, fill = factor(malaria))) +
+            geom_col(position = "dodge") +
+            scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+            labs(
+                title = "Relationship between x7259s1 Genotype and Malaria Infection",
+                x = "x7259s1",
+                y = "Percent of Infection",
+                fill = "Malaria Status (N=unaffected, Y=affected)"
+            ) +
+            theme_minimal()
     })
 }
 
-
+# Run the App
 shinyApp(ui = ui, server = server)
+
 ```
 
 
