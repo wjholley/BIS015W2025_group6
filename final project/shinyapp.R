@@ -108,9 +108,10 @@ malaria_cont_cards <- list(
 )
 
 malaria_cont_inputs <- list(selectInput("malariacont",
-                                   "Get stats for different continuous variables",
+                                   "Choose what continuous variable to plot malaria against:",
                                    choices = c("Distance from Water" = "distwater", "Distance from Urban Areas" = "dist_urb", "Distance from Livestock Farms" = "distfarm", "Distance from Poultry Farms" = "distpoul", "Altitude" = "altitude", "Minimum Temperature" = "mintemp"),
-                                   selected = ("distwater")))
+                                   selected = ("distwater")),
+                            checkboxInput("show_outliers", "Show Outliers", value = TRUE))
 
 malaria_genetics_input <- list(selectInput("protein", "Select TLR4 Haploid:", 
                           choices = c("TLR4 Protein 1" = "tlr4_prot_1", "TLR4 Protein 2" = "tlr4_prot_2", "TLR4 Protein 3" = "tlr4_prot_3", "TLR4 Protein 4" = "tlr4_prot_4"), 
@@ -145,14 +146,16 @@ faceting_cards <- list(
 )
 
 faceting_inputs <- list(
+  column(12,
   selectInput("x_faceting",
               "X variable",
-              choices = c("x5239s1_a","x5239s1_t", "x7259s1_a","x7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
-              selected = "x5239s1_a"),
+              choices = c("5239s1_a","5239s1_t", "7259s1_a","7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
+              selected = "5239s1_a"),
   selectInput("y_faceting",
               "Y variable",
-              choices = c("x5239s1_a","x5239s1_t", "x7259s1_a","x7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
-              selected = "x5239s1_t")
+              choices = c("5239s1_a","5239s1_t", "7259s1_a","7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
+              selected = "5239s1_t")
+  )
 )
 
 ##Beginning of the app itself/UI Section
@@ -176,7 +179,7 @@ ui <- page_navbar(
             layout_columns(malaria_cat_cards[[1]])
               ),
             accordion_panel("Continuous Input",
-                            layout_columns(malaria_cont_inputs[[1]]),
+                            layout_columns(malaria_cont_inputs[[1]], malaria_cont_inputs[[2]]),
                             layout_columns(col_widths = c(6, 3, 3),
                                             malaria_cont_cards[[1]], 
                                              value_box(
@@ -228,8 +231,8 @@ ui <- page_navbar(
                       )
   ),
   nav_panel(title = "Faceting for Genetic Factors", p("Plotting options for malaria and two genome-related variables"),
-            layout_columns(faceting_inputs[[1]], faceting_inputs[[2]]),
-            layout_columns(faceting_cards[[1]])
+            layout_columns(col_widths = c(3,9),
+                           faceting_inputs[[1]], layout_columns(faceting_cards[[1]])),
             ),
   
   nav_menu(title = "Links",
@@ -298,11 +301,23 @@ server <- function(input, output, session) {
   })
   
   output$malariacontplot <- renderPlot({
-    tf_ps %>%
-      filter(malaria == "Y" | malaria == "N") %>% 
-      ggplot(aes_string(x = "malaria", y = input$malariacont))+
-      geom_boxplot()+
-      theme_stata()+
+    plot_data <- tf_ps %>%
+      filter(malaria == "Y" | malaria == "N")
+    
+    # Compute Y-axis limits without outliers
+    if (!input$show_outliers) {
+      y_limits <- plot_data %>%
+        group_by(malaria) %>%
+        summarise(ymin = quantile(!!sym(input$malariacont), 0.25, na.rm = TRUE) - 1.5 * IQR(!!sym(input$malariacont), na.rm = TRUE),
+                  ymax = quantile(!!sym(input$malariacont), 0.75, na.rm = TRUE) + 1.5 * IQR(!!sym(input$malariacont), na.rm = TRUE)) %>%
+        summarise(ymin = min(ymin, na.rm = TRUE), ymax = max(ymax, na.rm = TRUE))
+    }
+    
+    ggplot(plot_data, aes_string(x = "malaria", y = input$malariacont, fill = "malaria")) +
+      geom_boxplot(color = "black", alpha = 0.5, 
+                   outlier.shape = ifelse(input$show_outliers, 16, NA)) +  # Toggle outliers
+      coord_cartesian(ylim = if (!input$show_outliers) c(y_limits$ymin, y_limits$ymax) else NULL) + 
+      theme_stata() +
       labs(x = "Malaria Status")
   })
   
@@ -415,7 +430,7 @@ output$facetingplot <- renderPlot({
   snp_plot_data %>% 
     ggplot(aes(malaria, perc, fill = malaria))+
     geom_col(color = "black", alpha = 0.5)+
-    facet_grid(as.formula(paste(input$y_faceting, "~", input$x_faceting)), labeller = label_both) +
+    facet_grid(get(input$x_faceting)~get(input$y_faceting), labeller = label_both)+
     labs(y = "Percent of Population",
          x = NULL,
          title = "Absence or Presence of Malaria by SNP Allele")+
@@ -424,5 +439,3 @@ output$facetingplot <- renderPlot({
 
 }
 shinyApp(ui, server)
-
-#facet_grid(get(input$x_faceting)~get(input$y_faceting, labeller = label_both))+

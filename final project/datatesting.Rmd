@@ -52,6 +52,14 @@ tf_ps %>%
       .[[2]]
 ```
 
+tf_ps %>%
+      filter(malaria == "Y" | malaria == "N") %>% 
+      ggplot(aes_string(x = "malaria", y = input$malariacont, fill = "malaria")) +
+      geom_boxplot(color = "black", alpha = 0.5, 
+      outlier.shape = ifelse(input$show_outliers, 16, NA)) +  # Toggle outliers
+      theme_stata() +
+      labs(x = "Malaria Status")
+
 
 
 
