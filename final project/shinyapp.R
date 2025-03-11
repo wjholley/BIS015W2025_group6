@@ -435,7 +435,7 @@ output$facetingplot <- renderPlot({
   snp_plot_data %>% 
     ggplot(aes(malaria, perc, fill = malaria))+
     geom_col(color = "black", alpha = 0.5)+
-    facet_grid(get(input$x_faceting)~get(input$y_faceting), labeller = label_both)+
+    facet_grid(get(input$y_faceting)~get(input$x_faceting), labeller = label_both)+
     labs(y = "Percent of Population",
          x = NULL,
          title = "Absence or Presence of Malaria by SNP Allele")+
