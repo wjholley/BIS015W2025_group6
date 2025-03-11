@@ -42,51 +42,51 @@ ps_cards <- list(
                   card(
                     full_screen = TRUE,
                     card_header("Map 1"),
-                    plotOutput("psplot1")
+                    plotOutput("psplot1", width = "100%", height = "100%")
                   ),
                   card(
                     full_screen = TRUE,
                     card_header("Map 2"),
-                    plotOutput("psplot2")
+                    plotOutput("psplot2", width = "100%", height = "100%")
                   )
                 )
 
 ps_inputs <-  list(selectInput("pscolor1",
                           "Select what to color samples by for map #1:",
-                          choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Livestock Farms" = "distfarm_cat", "Relative Distance from Poultry Farms" = "distpoul_cat"),
+                          choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Livestock Farms" = "distfarm_cat", "Relative Distance from Poultry Farms" = "distpoul_cat", "Altitude" = "altitude"),
                           selected = ("malaria")),
                   selectInput("pscolor2",
                                "Select what to color samples by for map #2:",
-                               choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Livestock Farms" = "distfarm_cat", "Relative Distance from Poultry Farms" = "distpoul_cat"),
+                               choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Livestock Farms" = "distfarm_cat", "Relative Distance from Poultry Farms" = "distpoul_cat", "Altitude" = "altitude"),
                                selected = ("distwater_cat")))
 
 tf_cards <- list(
                    card(
                     full_screen = TRUE,
                     card_header("Map 1"),
-                    plotOutput("tfplot1")
+                    plotOutput("tfplot1", width = "100%", height = "100%")
                   ),
                   card(
                     full_screen = TRUE,
                     card_header("Map 2"),
-                    plotOutput("tfplot2")
+                    plotOutput("tfplot2", width = "100%", height = "100%")
                   )
                 )
 
 tf_inputs <-  list(selectInput("tfcolor1",
                                "Select what to color samples by for map #1:",
-                               choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Livestock Farms" = "distfarm_cat", "Relative Distance from Poultry Farms" = "distpoul_cat"),
+                               choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Livestock Farms" = "distfarm_cat", "Relative Distance from Poultry Farms" = "distpoul_cat", "Altitude" = "altitude"),
                                selected = ("malaria")),
                    selectInput("tfcolor2",
                                "Select what to color samples by for map #2:",
-                               choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Livestock Farms" = "distfarm_cat", "Relative Distance from Poultry Farms" = "distpoul_cat"),
+                               choices = c("Malaria" = "malaria", "Relative Distance from Water" = "distwater_cat", "Relative Distance from Urban Areas" = "disturb_cat", "Relative Distance from Livestock Farms" = "distfarm_cat", "Relative Distance from Poultry Farms" = "distpoul_cat", "Altitude" = "altitude"),
                                selected = ("distwater_cat")))
 
 malaria_cat_cards <- list(
   card(
     full_screen = TRUE,
     card_header("% of Birds Positive for Malaria vs (Your Choice)"),
-    plotOutput("malariacatplot")
+    plotOutput("malariacatplot", height = "500px")
   )
 )
 
@@ -148,11 +148,11 @@ faceting_cards <- list(
 faceting_inputs <- list(
   column(12,
   selectInput("x_faceting",
-              "X variable",
+              "Allele 1",
               choices = c("5239s1_a","5239s1_t", "7259s1_a","7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
               selected = "5239s1_a"),
   selectInput("y_faceting",
-              "Y variable",
+              "Allele 2",
               choices = c("5239s1_a","5239s1_t", "7259s1_a","7259s1_t", "tlr4_1_a", "tlr4_1_g", "tlr4_2_a", "tlr4_2_g", "tlr4_3_c", "tlr4_3_t", "tlr4_4_a", "tlr4_4_c"),
               selected = "5239s1_t")
   )
@@ -250,7 +250,7 @@ server <- function(input, output, session) {
       geom_point(data = ps_coordinates, 
                  aes_string("longitude", "latitude", color = input$pscolor1))+
       theme_stata()+
-      theme(legend.position = "bottom")+
+      theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))+
       labs(x = "Longitude", y = "Latitude")
     })
   
@@ -260,7 +260,7 @@ server <- function(input, output, session) {
       geom_point(data = ps_coordinates, 
                  aes_string("longitude", "latitude", color = input$pscolor2))+
       theme_stata()+
-      theme(legend.position = "bottom")+
+      theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))+
       labs(x = "Longitude", y = "Latitude")
   })
 
@@ -270,7 +270,7 @@ server <- function(input, output, session) {
       geom_point(data = tf_coordinates, 
                  aes_string("longitude", "latitude", group = input$tfcolor1, color = input$tfcolor1))+
       theme_stata()+
-      theme(legend.position = "bottom")+
+      theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))+
       labs(x = "Longitude", y = "Latitude")
   })
   
@@ -280,7 +280,7 @@ server <- function(input, output, session) {
       geom_point(data = tf_coordinates, 
                  aes_string("longitude", "latitude", group = input$tfcolor2, color = input$tfcolor2))+
       theme_stata()+
-      theme(legend.position = "bottom")+
+      theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))+
       labs(x = "Longitude", y = "Latitude")
   })
   
@@ -296,6 +296,7 @@ server <- function(input, output, session) {
       geom_col(color = "black")+
       scale_y_continuous(limits = c(0, 100))+
       theme_stata()+
+      theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))+
       scale_fill_gradient(low = "white", high = "salmon")+  
       labs(y = "Percent of Birds Positive for Malaria")
   })
@@ -318,6 +319,7 @@ server <- function(input, output, session) {
                    outlier.shape = ifelse(input$show_outliers, 16, NA)) +  # Toggle outliers
       coord_cartesian(ylim = if (!input$show_outliers) c(y_limits$ymin, y_limits$ymax) else NULL) + 
       theme_stata() +
+      theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))+
       labs(x = "Malaria Status")
   })
   
@@ -353,7 +355,9 @@ server <- function(input, output, session) {
         x = "Malaria",
         y = "Percent",
         fill = "TLR4 variant specified")+
-      theme_stata()
+      theme_stata()+
+      theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))+
+      theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))
   })
   
   output$tenerifepositive <- renderText({
@@ -416,7 +420,8 @@ server <- function(input, output, session) {
            x = "Malaria",
            y = "Percent",
            fill = "SNP variant specified")+
-      theme_stata()
+      theme_stata()+
+      theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))
   })
 
 output$facetingplot <- renderPlot({
@@ -434,7 +439,8 @@ output$facetingplot <- renderPlot({
     labs(y = "Percent of Population",
          x = NULL,
          title = "Absence or Presence of Malaria by SNP Allele")+
-    theme_stata()
+    theme_stata()+
+    theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))
 })
 
 }
