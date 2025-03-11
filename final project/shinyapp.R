@@ -161,7 +161,7 @@ faceting_inputs <- list(
 
 ##Beginning of the app itself/UI Section
 ui <- page_navbar(
-  title = "Avians of Tenerife and Porto Santo",
+  title = "Pipits of Tenerife and Porto Santo",
   theme = project_theme,
   nav_panel(title = "Porto Santo", p("Mapping options for Porto Santo."),
             layout_columns(ps_inputs[[1]], ps_inputs[[2]]),
