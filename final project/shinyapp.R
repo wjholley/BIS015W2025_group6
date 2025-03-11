@@ -1,4 +1,4 @@
-#install.packages(c("bsicons",tidyverse", "janitor", "gtools", "sf", "ggmap", "shiny", "shinydashboard", "bslib", "ggthemes", "thematic"))
+#install.packages(c("bsicons", "tidyverse", "janitor", "gtools", "sf", "ggmap", "shiny", "shinydashboard", "bslib", "ggthemes", "thematic"))
 library(tidyverse)
 library(janitor)
 library(gtools)
