@@ -248,7 +248,7 @@ server <- function(input, output, session) {
     
     ggmap(ps_map)+
       geom_point(data = ps_coordinates, 
-                 aes_string("longitude", "latitude", color = input$pscolor1))+
+                 aes_string("longitude", "latitude", color = input$pscolor1), size = 2)+
       theme_stata()+
       theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))+
       labs(x = "Longitude", y = "Latitude")
@@ -258,7 +258,7 @@ server <- function(input, output, session) {
     
     ggmap(ps_map)+
       geom_point(data = ps_coordinates, 
-                 aes_string("longitude", "latitude", color = input$pscolor2))+
+                 aes_string("longitude", "latitude", color = input$pscolor2), size = 2)+
       theme_stata()+
       theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))+
       labs(x = "Longitude", y = "Latitude")
@@ -268,7 +268,7 @@ server <- function(input, output, session) {
     
     ggmap(tf_map)+
       geom_point(data = tf_coordinates, 
-                 aes_string("longitude", "latitude", group = input$tfcolor1, color = input$tfcolor1))+
+                 aes_string("longitude", "latitude", group = input$tfcolor1, color = input$tfcolor1), size = 2)+
       theme_stata()+
       theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))+
       labs(x = "Longitude", y = "Latitude")
@@ -278,7 +278,7 @@ server <- function(input, output, session) {
     
     ggmap(tf_map)+
       geom_point(data = tf_coordinates, 
-                 aes_string("longitude", "latitude", group = input$tfcolor2, color = input$tfcolor2))+
+                 aes_string("longitude", "latitude", group = input$tfcolor2, color = input$tfcolor2), size = 2)+
       theme_stata()+
       theme(legend.position = "bottom", axis.text = element_text(size = 15), axis.title = element_text(size = 15), legend.text = element_text(size = 15))+
       labs(x = "Longitude", y = "Latitude")
