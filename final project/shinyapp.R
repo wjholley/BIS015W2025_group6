@@ -425,7 +425,7 @@ server <- function(input, output, session) {
   })
 
 output$facetingplot <- renderPlot({
-  snp_plot_data <- genomics_tf_ps %>% 
+  snp_plot_data <- tf_ps %>% 
     filter(!is.na(malaria)&!is.na(!!sym(input$x_faceting))&!is.na(!!sym(input$y_faceting))) %>%
     group_by(malaria, !!sym(input$x_faceting), !!sym(input$y_faceting)) %>% 
     summarize(n=n(), .groups = 'keep') %>%
